@@ -115,7 +115,7 @@
       /* Rule 2 — on or before the start is a NEW start, not a backwards range. */
       else if (d <= start) { start = d; end = null; note = null; }
       /* Mountain Villa: a range may not cross a booked night; past the wall it is a new start. */
-      else if (wall(start) && d > wall(start)) { if (taken(d)) return; start = d; end = null; note = null; }
+      else if (wall(start) && d > wall(start)) { note = L.crosses ? L.crosses(fmtLong(wall(start))) : null; tabDate = d; render(); return; }
       /* Rule 3 — complete it, if the nights between allow. */
       else if (nights(start, d) < minStay) { note = L.minStay(fmtLong(addDays(start, minStay))); }
       else { end = d; note = null; }

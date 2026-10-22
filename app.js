@@ -4,6 +4,16 @@
    SNDR request flow. Runs on index.html, villa-i.html and villa-ii.html. */
 (() => {
   document.documentElement.classList.add('app-ready');
+  /* Cross-document view transitions (styles.css @view-transition): when the
+     browser skips one, as iOS Safari does on Back into the bfcache, its
+     promises reject. Nothing is wrong; handle them so they are not reported
+     as unhandled rejections (Codex iOS audit, 22 Oct 2026: 2 of 2 Back trials). */
+  const quiet = (e) => {
+    const vt = e.viewTransition;
+    if (vt) ['ready', 'finished', 'updateCallbackDone'].forEach((k) => vt[k] && vt[k].catch(() => {}));
+  };
+  window.addEventListener('pageswap', quiet);
+  window.addEventListener('pagereveal', quiet);
   const hero = document.querySelector('.hero');
   const doors = document.querySelector('.doors');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -108,7 +118,27 @@
     // iOS Safari's toolbar long after it is invisible.
     if (curtain) setTimeout(() => curtain.remove(), 1600);
   };
-  if (hero) {
+  /* The loading slate (first visit of a session): it lifts after the mark has
+     risen and the hairline has filled (1.6 s), or when both door photographs
+     are decoded if that is later, but never later than 2.6 s. The doors start
+     their own entrance under the lift. Removed from the DOM after: a parked
+     full-screen layer tints iOS Safari's toolbar. */
+  const slate = document.querySelector('.slate');
+  const slateOn = slate && !document.documentElement.classList.contains('no-slate') && getComputedStyle(slate).display !== 'none';
+  if (slate && !slateOn) slate.remove();
+  if (hero && slateOn) {
+    try { sessionStorage.setItem('mv-intro', '1'); } catch (_) { /* no storage: it plays each visit */ }
+    const imgs = [...hero.querySelectorAll('.door-media img')];
+    const decoded = Promise.all(imgs.map((img) => img.decode().catch(() => {})));
+    Promise.race([
+      Promise.all([decoded, new Promise((r) => setTimeout(r, 1600))]),
+      new Promise((r) => setTimeout(r, 2600)),
+    ]).then(() => {
+      slate.classList.add('is-lifting');
+      setTimeout(ready, 120);
+      setTimeout(() => slate.remove(), 900);
+    });
+  } else if (hero) {
     if (reduce.matches) {
       ready();
     } else {
@@ -221,22 +251,52 @@
       checkIn: 'Arrival', checkOut: 'Departure', pickDate: 'Pick a date', afterCheckIn: 'After arrival',
       night: 'night', nights: 'nights', prevMonth: 'Previous month', nextMonth: 'Next month', taken: 'booked',
       empty: '', minStay: (d) => `Two nights at least: the earliest departure is ${d}.`, chosen: () => '',
+      crosses: (d) => `The house is booked from ${d}. Choose a departure on or before that day, or a new arrival.`,
     };
     let picker;
     let step = 'dates';
+    /* Guests: up to ten in one house, twenty in both. Price: what the stay costs booked direct, from
+       the Airbnb totals read on 22 Oct 2026 less 5%, per night (Mountain Villa showed one price in
+       November and June; Mountain Villa II €881 in winter, €1,113 in summer). An estimate the hosts
+       confirm, said so on the page. */
+    const MAX = { v1: 10, v2: 10, both: 20 };
+    const RATE = { v1: () => 2369 / 3, v2: (d) => (d.getMonth() >= 4 && d.getMonth() <= 8 ? 3339 / 3 : 2644 / 3) };
+    const nEl = document.getElementById('stayN'), gnote = document.getElementById('stayGnote');
+    const price = document.getElementById('stayPrice');
+    const minus = document.querySelector('.stay-minus'), plus = document.querySelector('.stay-plus');
+    let guests = 6;
+    const eur = (n) => '€' + Math.round(n).toLocaleString('en-GB');
+    const quote = (r) => {
+      let airbnb = 0;
+      for (let d = r.start; d < r.end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+        airbnb += which === 'both' ? RATE.v1(d) + RATE.v2(d) : RATE[which](d);
+      }
+      return { airbnb, direct: airbnb * 0.95 };
+    };
+    const paintGuests = () => {
+      guests = Math.min(Math.max(guests, 1), MAX[which]);
+      nEl.textContent = String(guests);
+      minus.disabled = guests <= 1; plus.disabled = guests >= MAX[which];
+      gnote.textContent = guests >= MAX[which] ? (which === 'both' ? 'Both houses sleep twenty.' : 'Each house sleeps ten. For more, choose both houses.') : '';
+    };
+    minus.addEventListener('click', () => { guests--; paintGuests(); sync(); });
+    plus.addEventListener('click', () => { guests++; paintGuests(); sync(); });
     const short = (d) => `${d.getDate()} ${L.months[d.getMonth()].slice(0, 3)}`;
     const label = (t) => { go.querySelector('.stay-go-t').textContent = t; };
     const sync = () => {
       const r = picker.get();
       if (r.start && r.end) {
-        sum.textContent = `${r.nights} nights in ${NAME[which]}, ${short(r.start)} to ${short(r.end)}.`;
+        sum.textContent = `${r.nights} nights in ${NAME[which]}, ${short(r.start)} to ${short(r.end)}, ${guests} ${guests === 1 ? 'guest' : 'guests'}.`;
+        const q = quote(r);
+        price.hidden = false;
+        price.innerHTML = `<span class="stay-price-v">${eur(q.direct)}</span><span class="stay-price-l">booking direct, about ${eur(q.direct / r.nights)} a night<br><s>${eur(q.airbnb)} on Airbnb</s>. The hosts confirm the exact price.</span>`;
         go.disabled = false;
         label(step === 'details' ? 'Send the request' : 'Request these dates');
       } else {
         sum.textContent = r.start
           ? `Arriving ${picker.fmtLong(r.start)}. Now choose your departure.`
           : 'Choose your arrival, then your departure.';
-        go.disabled = true;
+        go.disabled = true; price.hidden = true;
         step = 'dates'; req.hidden = true;
         label('Choose your dates');
       }
@@ -266,7 +326,7 @@
     opts.forEach((b) => b.addEventListener('click', () => {
       if (which === b.dataset.key) return;
       const r = picker.get();
-      which = b.dataset.key; mark();
+      which = b.dataset.key; mark(); paintGuests();
       let free = !!(r.start && r.end);
       for (let d = r.start; free && d < r.end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) if (sets[which].has(picker.key(d))) free = false;
       mountPicker(r.start, free ? r.end : null);
@@ -292,6 +352,7 @@
     });
     req.addEventListener('input', (e) => e.target.removeAttribute('aria-invalid'));
     mark();
+    paintGuests();
     sync();
     window.addEventListener('pageshow', (e) => {
       if (!e.persisted) return;

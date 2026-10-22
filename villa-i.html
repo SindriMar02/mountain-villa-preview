@@ -6,7 +6,7 @@
 <title>Mountain Villa · a log house for ten at Flúðir, Iceland</title>
 <meta name="description" content="Mountain Villa: a log house for ten on a large private property at Flúðir, with a hot tub, cold plunge, sauna and a glass dome over the fields.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#121211">
+<meta name="theme-color" content="#243c32">
 <!-- Design preview by SNDR Studio for Mountain Villa and Mountain Villa II, Flúðir.
      Photos, copy and reviews are from the two Airbnb listings (22 Oct 2026).
      Built from _parts/build_pages.py; edit that, not this file. -->
@@ -14,8 +14,11 @@
 <link rel="preload" href="assets/img/door-v1.webp" as="image" fetchpriority="high">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="styles.css?v=16dc1674">
+<link rel="stylesheet" href="styles.css?v=b825b2dc">
 <script>document.documentElement.classList.add('js');
+/* The loading slate plays once per session, never under reduced motion, never with ?nointro. */
+try{var q=/[?&]nointro/.test(location.search),m=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(q||m||sessionStorage.getItem('mv-intro'))document.documentElement.classList.add('no-slate')}catch(e){document.documentElement.classList.add('no-slate')}
 /* Failsafe: if app.js never runs, the hero must not stay behind its curtain. */
 setTimeout(function(){if(!document.documentElement.classList.contains('app-ready'))document.documentElement.classList.remove('js')},3500)</script>
 </head>
@@ -24,7 +27,7 @@ setTimeout(function(){if(!document.documentElement.classList.contains('app-ready
 <a class="skip meta" href="#book">Skip to dates</a>
 
 <main id="top">
-  <div class="door door--opener" style="--focal:50% 50%;--focal-m:30% 50%">
+  <div class="door door--opener" style="--focal:50% 50%;--focal-m:60% 50%">
       <div class="door-media"><img src="assets/img/door-v1.webp" width="2400" height="1500" alt="Mountain Villa at night: the log house and its glass dome lit up under a sky full of green northern lights, snow and birches around it" fetchpriority="high" decoding="async"></div>
       <nav class="bar" aria-label="Site"><a class="bar-brand" translate="no" href="index.html">mountain villa</a><a class="bar-cta meta" href="#book">Check dates</a></nav>
       <div class="door-top">
@@ -91,12 +94,13 @@ setTimeout(function(){if(!document.documentElement.classList.contains('app-ready
 
   <section class="ch stay" id="book" aria-labelledby="book-title">
     <h2 class="ch-title stay-title rv" id="book-title" tabindex="-1"><span class="tw" style="--i:0"><span>check</span></span> <span class="tw" style="--i:1"><span>dates</span></span></h2>
+    <div class="stay-guests" role="group" aria-labelledby="stayGuestsL"><p class="meta" id="stayGuestsL">Guests</p><div class="stay-step"><button type="button" class="stay-minus" aria-label="One guest fewer">−</button><output class="stay-n" id="stayN" aria-live="polite">6</output><button type="button" class="stay-plus" aria-label="One guest more">+</button></div><p class="stay-gnote" id="stayGnote" aria-live="polite"></p></div>
     <div class="stay-cal" id="stayCal" data-key="v1" role="group" aria-label="Choose your dates" aria-description="Use arrow keys to move between dates, and Enter or Space to select. Page Up and Page Down change months. Struck-through dates are already booked."></div>
       <p class="stay-sum" id="staySum" aria-live="polite">Choose your arrival, then your departure.</p>
+      <p class="stay-price" id="stayPrice" hidden></p>
       <form class="stay-req" id="stayReq" hidden novalidate>
         <label><span class="meta">Name</span><input name="name" autocomplete="name" required></label>
         <label><span class="meta">Email</span><input type="email" name="email" autocomplete="email" inputmode="email" spellcheck="false" required></label>
-        <label><span class="meta">Guests</span><input type="number" name="guests" inputmode="numeric" min="1" max="20" value="6" required></label>
         <label class="stay-req-wide"><span class="meta">Anything the hosts should know?</span><textarea name="message" rows="3"></textarea></label>
         <p class="stay-req-err stay-req-wide" id="stayErr" aria-live="polite"></p>
       </form>
@@ -119,8 +123,8 @@ setTimeout(function(){if(!document.documentElement.classList.contains('app-ready
 <script src="assets/vendor/gsap.min.js" defer></script>
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
-<script src="assets/vendor/staypicker.js" defer></script>
-<script src="assets/vendor/taken.js" defer></script>
-<script src="app.js?v=7821e653" defer></script>
+<script src="assets/vendor/staypicker.js?v=555733a4" defer></script>
+<script src="assets/vendor/taken.js?v=0f83451b" defer></script>
+<script src="app.js?v=c1dd9276" defer></script>
 </body>
 </html>

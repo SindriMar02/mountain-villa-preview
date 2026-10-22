@@ -1,6 +1,9 @@
 /* Mountain Villa: the Twin Villas stacked doors (fork of Klettar, 2026-10-10)
    for Mountain Villa + Mountain Villa II, Flúðir. Tokens and rules in DESIGN.md. */
 
+@font-face{font-family:'Boska';src:url('assets/fonts/Boska-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'Boska';src:url('assets/fonts/Boska-LightItalic.woff2') format('woff2');font-weight:300;font-style:italic;font-display:swap}
+@font-face{font-family:'Switzer';src:url('assets/fonts/Switzer-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 @font-face{
   font-family:'Overused Grotesk';
   src:url('assets/fonts/OverusedGrotesk-Book.woff2') format('woff2');
@@ -18,6 +21,11 @@
   --salt:#F3F1EC;
   --salt-72:rgba(243,241,236,.72);
   --hair:rgba(243,241,236,.16);
+  /* the first Mountain Villa prototype's palette (20 Oct): forest on white and mist */
+  --forest:#243c32;
+  --forest-2:#365344;
+  --paper:#ffffff;
+  --mist:#edf0eb;
 
   --e-out:cubic-bezier(.22,1,.36,1);
   --e-hover:cubic-bezier(.25,1,.5,1);
@@ -58,10 +66,10 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
-html{background:var(--ink);color-scheme:dark;scroll-behavior:smooth;
+html{background:var(--forest);color-scheme:light;scroll-behavior:smooth;
   -webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;background:var(--ink);color:var(--salt);overflow-x:clip;
-  font-family:'Overused Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+body{margin:0;background:var(--paper);color:var(--salt);overflow-x:clip;
+  font-family:'Switzer',system-ui,-apple-system,'Segoe UI',sans-serif;
   font-size:17px;line-height:1.5;font-kerning:normal;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 p,h1,h2,h3,dl,dd,figure,ul{margin:0}
@@ -220,6 +228,26 @@ img{display:block;max-width:100%;height:auto}
 .doors.is-opening{pointer-events:none}
 /* Snapping back offscreen after the jump: no transition, so Back never shows it. */
 .doors.is-resetting .door,.doors.is-resetting .door *,.doors.is-resetting .door::before{transition:none !important}
+
+/* ---------- LOADING SLATE (home, once per session) ----------
+   The flat mark on the page ground, uncovered by the site's own device (the
+   wordmark rising through its mask), one hairline filling along the bottom,
+   then the whole slate lifts (clip-path, expo in-out) while the curtain below
+   parts from its seam. About 2.4 s. app.js lifts it and removes it. */
+.slate{display:none}
+html.js:not(.no-slate) .slate{display:block;position:fixed;inset:0;z-index:60;background:var(--ink);
+  clip-path:inset(0 0 0 0);transition:clip-path .78s cubic-bezier(.87,0,.13,1)}
+.slate.is-lifting{clip-path:inset(0 0 100% 0)}
+.slate-mark{position:absolute;left:50%;top:50%;margin:0;transform:translateY(-58%);color:var(--salt);
+  font-size:clamp(52px,7.4vw,128px);line-height:.98;letter-spacing:-.04em;white-space:nowrap}
+.slate-mark .wl{display:block;overflow:hidden;padding-bottom:.06em;margin-bottom:-.06em}
+.slate-mark .wl > span{display:block;transform:translateY(112%);animation:slate-rise .95s var(--e-out) .15s forwards}
+.slate-mark .wl:nth-child(2) > span{animation-delay:.24s}
+.slate-line{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--salt);opacity:.6;
+  transform:scaleX(0);transform-origin:0 50%;animation:slate-fill 1.35s cubic-bezier(.65,0,.35,1) .25s forwards}
+@keyframes slate-rise{to{transform:none}}
+@keyframes slate-fill{to{transform:scaleX(1)}}
+@media (max-width:719px){ .slate-mark{font-size:clamp(36px,11vw,60px)} }
 
 /* ---------- INTRO ---------- */
 .curtain{display:none}
@@ -397,7 +425,7 @@ main{container-type:inline-size}
 .stay{padding-bottom:clamp(96px,10vw,160px);row-gap:22px}
 .stay > :not(.stay-cal){grid-column:a / b;margin-right:clamp(24px,5cqw,96px)}
 .stay-title{max-width:none;font-size:clamp(48px,6.4vw,112px)}
-.stay-cal{grid-column:b / d;grid-row:1 / span 8;container-type:inline-size;align-self:start}
+.stay-cal{grid-column:b / d;grid-row:1 / span 10;container-type:inline-size;align-self:start}
 .stay-which{display:grid;gap:10px}
 .stay-opt{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
   min-height:76px;padding:14px 18px;text-align:left;cursor:pointer;color:var(--salt);
@@ -409,6 +437,23 @@ main{container-type:inline-size}
 .stay-opt:focus-visible{outline:2px solid var(--salt);outline-offset:3px}
 @media (hover:hover) and (pointer:fine){ .stay-opt:not(.is-on):hover{border-color:var(--salt-72)} }
 .stay-sum{font-size:17px;line-height:1.5;min-height:3em;text-wrap:pretty}
+/* guests stepper and the price line (the SNDR Bókun pattern) */
+.stay-guests{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 16px;padding:14px 0;border-block:1px solid var(--hair)}
+.stay-guests .meta{color:var(--salt-72)}
+.stay-step{display:flex;align-items:center;gap:6px}
+.stay-step button{width:44px;height:44px;display:grid;place-items:center;font:inherit;font-size:20px;color:var(--salt);background:none;
+  border:1px solid var(--hair);border-radius:0;cursor:pointer;transition:border-color .2s ease}
+.stay-step button:disabled{opacity:.3;cursor:default}
+.stay-step button:focus-visible{outline:2px solid var(--salt);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){ .stay-step button:not(:disabled):hover{border-color:var(--salt-72)} }
+.stay-n{min-width:3ch;text-align:center;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stay-gnote{grid-column:1 / -1;font-size:13px;color:var(--salt-72);margin:0}
+.stay-gnote:empty{display:none}
+.stay-price{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline;margin:0}
+.stay-price[hidden]{display:none}
+.stay-price-v{font-size:clamp(30px,2.8vw,44px);line-height:1;letter-spacing:-.035em}
+.stay-price-l{font-size:13px;line-height:1.45;color:var(--salt-72)}
+.stay-price-l s{color:var(--salt-72)}
 .stay-go{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:60px;padding:0 22px;
   background:var(--salt);color:var(--ink);text-decoration:none;font-size:17px;letter-spacing:-.01em;
   transition:opacity .2s ease}
@@ -653,3 +698,37 @@ html.js .rv.is-in{opacity:1;transform:none}
   html.js .hero:not(.is-ready) :is(.door-coords,.door-place,.credit,.desc,.bar){opacity:1}
   html.js .rv{opacity:1;transform:none;transition:none !important}
 }
+
+
+/* ================= HYBRID THEME (22 Oct 2026) =================
+   Klettar's doors, verticals, mono meta and motion; the first Mountain Villa
+   prototype's tone: forest #243c32 on white and mist, Boska Light display with
+   an italic second line, Switzer body. The doors, openers and slate keep their
+   photograph-and-salt type; every section after them re-maps the same tokens to
+   the light palette (salt -> forest ink, ink -> white), so components need no
+   second set of rules. */
+main > section:not(.hero),main > .bleed,.stay{
+  --salt:#243c32;--salt-72:rgba(36,60,50,.74);--hair:rgba(36,60,50,.2);--ink:#ffffff;
+  color:var(--salt);background:var(--paper)}
+.stay{background:var(--mist)}
+.bleed-frame{background:var(--mist)}
+.foot{background:var(--forest)}
+.curtain i{background:var(--forest)}
+html.js:not(.no-slate) .slate{background:var(--forest)}
+/* display: Boska Light; the second wordmark line in italic, as on the first prototype */
+.wordmark,.bar-brand,.foot-mark,.slate-mark,.ch-title,.ch-sub,.stay-title,.stay-opt-name,.stay-done-t,.stay-price-v,
+.quote blockquote,.feat-list h3,.room-feats dt,.map-pt--home b,.ch-lede{font-family:'Boska',Georgia,serif;font-weight:300}
+.wordmark,.slate-mark,.foot-mark{letter-spacing:-.025em}
+.ch-title,.stay-title{letter-spacing:-.02em}
+.wordmark .wl + .wl > span,.slate-mark .wl + .wl > span,.ch-title .tw:last-child > span{font-style:italic}
+.wordmark .wl,.slate-mark .wl{padding-bottom:.08em;margin-bottom:-.08em}
+/* the map stays a dark, forest-toned plate inside the light section */
+.map{--salt:#F3F1EC;--salt-72:rgba(243,241,236,.74);--hair:rgba(243,241,236,.18);--ink:#243c32}
+.map-canvas,.m-land{background:#2b4a3c;fill:#2b4a3c}
+.m-water{fill:#1b3027}
+.map-cap{color:rgba(36,60,50,.74)}
+/* forms and the calendar on mist */
+.stay-req input,.stay-req textarea{background:#fff}
+.stay-req [aria-invalid="true"]{border-color:#b4442c}
+.stay-req-err{color:#b4442c}
+.kl-stay{background:#fff}
