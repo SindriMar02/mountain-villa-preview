@@ -52,11 +52,14 @@
     if (hero && doors) {
       // As the hero leaves: the wordmark lifts and fades (Aurora Hills), the photographs drift.
       const mark = hero.querySelector('.hero-mark');
-      if (mark) G.to(mark, { y: -110, opacity: 0.06, ease: 'none', scrollTrigger: leave(hero) });
+      // fromTo, never to(): with invalidateOnRefresh a to() re-reads its start on every refresh, so a
+      // resize (or the bfcache refresh on Back) while scrolled down made the faded state the new start
+      // and the name never came back at the top (Sindri, 22 Oct: "wordmark disappears scrolling back up").
+      if (mark) G.fromTo(mark, { y: 0, opacity: 1 }, { y: -110, opacity: 0.06, ease: 'none', scrollTrigger: leave(hero) });
     }
     const opener = document.querySelector('.door--opener');
     if (opener) {
-      G.to(opener.querySelector('.door-media'), { yPercent: 22, ease: 'none', scrollTrigger: leave(opener) });
+      G.fromTo(opener.querySelector('.door-media'), { yPercent: 0 }, { yPercent: 22, ease: 'none', scrollTrigger: leave(opener) });
     }
     document.querySelectorAll('.bleed-frame').forEach((frame) => {
       G.fromTo(frame.querySelector('img'), { scale: 1.12 }, {
@@ -108,6 +111,21 @@
         };
         lenis.scrollTo(target || 0, { immediate: kb, duration: 1.3, offset: -80, onComplete: land });
         if (kb) land();
+      });
+    });
+  } else if (!reduce.matches) {
+    /* Touch: the page runs scroll-behavior:auto once scripts run (a smooth html scroll makes every
+       ScrollTrigger refresh measure from the wrong place), so pointer taps on same-page links glide
+       here; scroll-margin-top keeps the bar clear. Keyboard activation lands at once. */
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const target = id === '#top' ? document.body : document.querySelector(id);
+        if (id.length < 2 || !target || e.detail === 0) return;
+        e.preventDefault();
+        if (id === '#top') window.scrollTo({ top: 0, behavior: 'smooth' });
+        else target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
       });
     });
   }

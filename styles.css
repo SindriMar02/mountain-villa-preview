@@ -1729,3 +1729,8 @@ html[data-theme="forest"] .bk-end{background:#F2F4EF}
 }
 @media (min-width:380px){ html.js .around .places-tabs{-webkit-mask-image:none;mask-image:none} }
 @media (max-width:719px){ .said .stream-ctl + .stream{margin-top:10px} }
+
+/* ScrollTrigger measures by jumping the page to 0 and back during a refresh; a smooth html scroll turns
+   that jump into a glide and every start/end lands off by the scroll position (the hero name stayed faded
+   after a resize mid-page). With scripts, anchors glide in JS instead (app.js). */
+html.js{scroll-behavior:auto}
