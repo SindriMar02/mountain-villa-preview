@@ -1569,7 +1569,7 @@ html.js .foot:has(.foot-base.is-in) .foot-mark{transform:translateY(.22em)}
 @supports not selector(:has(a)){ html.js .foot-mark{transform:translateY(.22em)} }
 @media (prefers-reduced-motion:reduce){ html.js .foot-mark{transition:none;transform:translateY(.22em)} }
 
-/* ===================== iOS PASS (23 Oct 2026; Sindri: "an extreme iOS pass, perfected on iOS and mobile") =====================
+/* ===================== iOS PASS (22 Oct 2026, late; Sindri: "an extreme iOS pass, perfected on iOS and mobile") =====================
    Found on the iPhone simulator (iOS 26.5 Safari), each with its cause. */
 
 /* focus-guard (studio rule): no ring after a tap, every ring for the keyboard */
@@ -1695,7 +1695,7 @@ html[data-theme="nature"] .bk-end{background:#F2F4EF}
   .bk-house{padding:0 0 6px}
 }
 
-/* ===== Codex audit, 23 Oct (codex-ios-audit/REPORT.md), applied after checking each against the source ===== */
+/* ===== Codex audit, 22 Oct (codex-ios-audit/REPORT.md), applied after checking each against the source ===== */
 /* the light solid bar: the Book button keeps a readable hover */
 @media (hover:hover) and (pointer:fine){
   html[data-theme="fjord"] .bar.is-solid .bar-cta:hover{background:#1B2A33;color:#EEF2F3;border-color:#1B2A33}
