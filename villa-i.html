@@ -46,6 +46,8 @@
 try{var q=/[?&]nointro/.test(location.search),m=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(q||m||sessionStorage.getItem('mv-intro'))document.documentElement.classList.add('no-slate');
 var th=new URLSearchParams(location.search).get('theme');if(th)sessionStorage.setItem('mv-theme',th);th=th||sessionStorage.getItem('mv-theme')||'fjord';if(th==='basalt')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=th;
+/* Safari 26 samples its bar colours at the first paint: start dark, as the first screen is a photograph (app.js SAFARI TINT takes over) */
+if(!location.hash)document.documentElement.classList.add('tint-dark');
 if(sessionStorage.getItem('mv-arrive')){sessionStorage.removeItem('mv-arrive');document.documentElement.classList.add('is-arrived')}}catch(e){document.documentElement.classList.add('no-slate')}
 /* Failsafe: if app.js never runs, the hero must not stay behind its curtain. */
 setTimeout(function(){if(!document.documentElement.classList.contains('app-ready'))document.documentElement.classList.remove('js')},3500)</script>
