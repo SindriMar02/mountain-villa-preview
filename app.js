@@ -399,6 +399,10 @@ function openBooking(trigger, viaKey = false) {
   if (lightbox.open) closeGallery(true, false);
   booking.prepare();
   if (booking.step === 'done') booking.reset(); // a sent request never greets the next open
+  // two houses, one sheet: the page decides which house the request starts on, the guest can change it
+  const house = trigger?.dataset.house || (location.pathname.startsWith('/mountain-villa-preview/villa-ii/') ? 'Villa II' : location.pathname.startsWith('/mountain-villa-preview/villa/') ? 'Villa I' : '');
+  if (house) $('select[name="house"]', book).value = house;
+  $('.bk-sub', book).textContent = `${house ? `Mountain Villa ${house.slice(6)}` : 'Mountain Villa'}, Flúðir · the whole house`;
   lockScroll(trigger);
   if (!book.open) book.showModal();
   updateTheme();
@@ -518,7 +522,7 @@ document.addEventListener('click', e => {
     }
     return;
   }
-  if (!['/mountain-villa-preview/', '/mountain-villa-preview/villa/', '/mountain-villa-preview/slow-days/', '/mountain-villa-preview/gallery/', '/mountain-villa-preview/stay/'].includes(url.pathname)) return;
+  if (!['/mountain-villa-preview/', '/mountain-villa-preview/villa/', '/mountain-villa-preview/villa-ii/', '/mountain-villa-preview/slow-days/', '/mountain-villa-preview/gallery/', '/mountain-villa-preview/stay/'].includes(url.pathname)) return;
   e.preventDefault(); navigate(url, { viaKey: e.detail === 0 });
 });
 addEventListener('popstate', e => {

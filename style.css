@@ -230,6 +230,13 @@ figcaption{font-size:12px;letter-spacing:.02em;margin-top:14px;color:var(--secon
 .section-heading{display:flex;justify-content:space-between;gap:40px;align-items:flex-end;margin-bottom:64px}
 .section-heading>p{max-width:340px}
 .bedroom-pair{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.two-houses{padding-top:0;padding-bottom:150px}
+.house-cards{display:grid;grid-template-columns:1fr 1fr;gap:5vw}
+.house-card .win{aspect-ratio:4/5}
+.house-card .win img{width:100%;height:100%;object-fit:cover}
+.house-card h3{margin-top:28px;font:300 clamp(36px,3.6vw,56px)/1.05 var(--display)}
+.house-card p{margin:10px 0 22px;color:var(--secondary)}
+@media (max-width:700px){.house-cards{grid-template-columns:1fr;gap:64px}.two-houses{padding-bottom:100px}}
 .bedroom-pair>figure:last-child{padding-top:110px}
 .fine-print{font-size:12px;line-height:1.65;color:var(--secondary)}
 .bedrooms>.fine-print{margin-top:34px}
@@ -607,9 +614,9 @@ dialog.bk::backdrop{background:transparent}
 .bk-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .bk-fields label{display:grid;gap:8px;font-size:13px}
 .bk-fields .bk-wide{grid-column:1/-1}
-.bk-fields input,.bk-fields textarea{font:inherit;font-size:16px;color:var(--forest);background:#fff;border:1px solid var(--line);padding:12px 14px;min-height:48px;border-radius:0;width:100%}
+.bk-fields input,.bk-fields textarea,.bk-fields select{font:inherit;font-size:16px;color:var(--forest);background:#fff;border:1px solid var(--line);padding:12px 14px;min-height:48px;border-radius:0;width:100%}
 .bk-fields textarea{resize:vertical;min-height:88px}
-.bk-fields input:focus-visible,.bk-fields textarea:focus-visible{outline:1px solid var(--forest);outline-offset:0;border-color:var(--forest)}
+.bk-fields input:focus-visible,.bk-fields textarea:focus-visible,.bk-fields select:focus-visible{outline:1px solid var(--forest);outline-offset:0;border-color:var(--forest)}
 .bk-fields input::placeholder{color:var(--secondary)}
 .bk-done{display:grid;gap:14px;padding-top:8px}
 .bk-done h3{font-size:clamp(34px,4vw,48px);outline:none}
