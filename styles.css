@@ -1,9 +1,11 @@
 /* Mountain Villa: the Twin Villas stacked doors (fork of Klettar, 2026-10-10)
    for Mountain Villa + Mountain Villa II, Flúðir. Tokens and rules in DESIGN.md. */
 
-@font-face{font-family:'Boska';src:url('assets/fonts/Boska-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
-@font-face{font-family:'Boska';src:url('assets/fonts/Boska-LightItalic.woff2') format('woff2');font-weight:300;font-style:italic;font-display:swap}
-@font-face{font-family:'Switzer';src:url('assets/fonts/Switzer-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Special Gothic Expanded One';src:url('assets/fonts/SpecialGothicExpandedOne-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Special Gothic';src:url('assets/fonts/SpecialGothic-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Special Gothic';src:url('assets/fonts/SpecialGothic-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'General Sans';src:url('assets/fonts/GeneralSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'General Sans';src:url('assets/fonts/GeneralSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 @font-face{
   font-family:'Overused Grotesk';
   src:url('assets/fonts/OverusedGrotesk-Book.woff2') format('woff2');
@@ -21,11 +23,15 @@
   --salt:#F3F1EC;
   --salt-72:rgba(243,241,236,.72);
   --hair:rgba(243,241,236,.16);
-  /* the first Mountain Villa prototype's palette (20 Oct): forest on white and mist */
-  --forest:#243c32;
-  --forest-2:#365344;
-  --paper:#ffffff;
-  --mist:#edf0eb;
+  /* v4 (22 Oct night): basalt ground, one ash band; the aurora and the timber are the colour */
+  --basalt:#121211;
+  --ash:#E6E4DE;
+  --forest:#121211;   /* kept as the name the base rules use for html/footer/curtain */
+  --paper:#121211;
+  --mist:#E6E4DE;
+  --display:'Special Gothic Expanded One','Special Gothic',Impact,sans-serif;
+  --gothic:'Special Gothic','Special Gothic Expanded One',Impact,sans-serif;
+  --body:'General Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
 
   --e-out:cubic-bezier(.22,1,.36,1);
   --e-hover:cubic-bezier(.25,1,.5,1);
@@ -69,7 +75,7 @@
 html{background:var(--forest);color-scheme:light;scroll-behavior:smooth;
   -webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--salt);overflow-x:clip;
-  font-family:'Switzer',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-family:var(--body);
   font-size:17px;line-height:1.5;font-kerning:normal;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 p,h1,h2,h3,dl,dd,figure,ul{margin:0}
@@ -700,35 +706,1026 @@ html.js .rv.is-in{opacity:1;transform:none}
 }
 
 
-/* ================= HYBRID THEME (22 Oct 2026) =================
-   Klettar's doors, verticals, mono meta and motion; the first Mountain Villa
-   prototype's tone: forest #243c32 on white and mist, Boska Light display with
-   an italic second line, Switzer body. The doors, openers and slate keep their
-   photograph-and-salt type; every section after them re-maps the same tokens to
-   the light palette (salt -> forest ink, ink -> white), so components need no
-   second set of rules. */
-main > section:not(.hero),main > .bleed,.stay{
-  --salt:#243c32;--salt-72:rgba(36,60,50,.74);--hair:rgba(36,60,50,.2);--ink:#ffffff;
-  color:var(--salt);background:var(--paper)}
-.stay{background:var(--mist)}
-.bleed-frame{background:var(--mist)}
-.foot{background:var(--forest)}
-.curtain i{background:var(--forest)}
-html.js:not(.no-slate) .slate{background:var(--forest)}
-/* display: Boska Light; the second wordmark line in italic, as on the first prototype */
-.wordmark,.bar-brand,.foot-mark,.slate-mark,.ch-title,.ch-sub,.stay-title,.stay-opt-name,.stay-done-t,.stay-price-v,
-.quote blockquote,.feat-list h3,.room-feats dt,.map-pt--home b,.ch-lede{font-family:'Boska',Georgia,serif;font-weight:300}
-.wordmark,.slate-mark,.foot-mark{letter-spacing:-.025em}
-.ch-title,.stay-title{letter-spacing:-.02em}
-.wordmark .wl + .wl > span,.slate-mark .wl + .wl > span,.ch-title .tw:last-child > span{font-style:italic}
-.wordmark .wl,.slate-mark .wl{padding-bottom:.08em;margin-bottom:-.08em}
-/* the map stays a dark, forest-toned plate inside the light section */
-.map{--salt:#F3F1EC;--salt-72:rgba(243,241,236,.74);--hair:rgba(243,241,236,.18);--ink:#243c32}
-.map-canvas,.m-land{background:#2b4a3c;fill:#2b4a3c}
-.m-water{fill:#1b3027}
-.map-cap{color:rgba(36,60,50,.74)}
-/* forms and the calendar on mist */
-.stay-req input,.stay-req textarea{background:#fff}
-.stay-req [aria-invalid="true"]{border-color:#b4442c}
-.stay-req-err{color:#b4442c}
-.kl-stay{background:#fff}
+/* ================= V3: KLETTAR'S DOORS UNDER ONE NAME (22 Oct 2026, night) =================
+   Sindri: "it was supposed to be the klettar doors idea: nice expand on hover and texts come
+   into view on hover, a large centred wordmark, the best front of each house". Two full-bleed
+   doors stacked top and bottom (Klettar's geometry: the photograph is always one hero tall and
+   centred on its door, so a growing door reveals more of the same picture). The wordmark sits
+   page-centred on the horizontal seam. The pointed door grows to 63 % and its lines rise. */
+:root{--hero-h:max(100svh,600px);--veil:#121211;--e-door:cubic-bezier(.22,1,.36,1)}
+.hero{position:relative;height:var(--hero-h);overflow:hidden;background:var(--veil)}
+.doors{display:flex;flex-direction:column;height:100%;position:relative;z-index:1}
+.door{position:relative;flex:1 1 0;min-height:0;overflow:hidden;display:block;text-decoration:none;color:var(--salt);transition:flex-grow .5s var(--e-door)}
+.hero .door-media,.door--next .door-media{position:absolute;z-index:0;left:0;right:0;top:50%;height:var(--hero-h);margin-top:calc(var(--hero-h) / -2);width:auto;transform:none}
+.door--opener .door-media{position:absolute;inset:0;height:100%;margin:0;transform:none;z-index:0}
+.door-media img{width:100%;height:100%;object-fit:cover;object-position:var(--focal,50% 50%);transform:scale(1.06);transition:transform .9s var(--e-door)}
+.door--opener .door-media img{transform:none}
+/* the measured scrim (Villa North): the foot reads, the picture keeps its sky */
+.door::before{display:none}
+.door::after{content:'';display:block;position:absolute;inset:0;z-index:1;pointer-events:none;opacity:1;
+  background:linear-gradient(to top,rgba(16,18,22,.84) 0%,rgba(16,18,22,.38) 34%,rgba(16,18,22,.08) 62%,rgba(16,18,22,.22) 100%)}
+.door-top,.door-foot{text-shadow:none}
+/* the foot: numeral + name at rest; spec, facts and the cue rise into view on hover */
+.door-foot{position:absolute;z-index:2;left:0;right:0;bottom:0;top:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;
+  justify-items:start;padding:clamp(16px,2.6vw,36px) clamp(18px,3vw,44px);margin:0;transform:none;opacity:1}
+.door[data-house="v2"] .door-foot{justify-items:end;text-align:right}
+/* the wordmark owns the seam: the top door speaks from its top-left (under the bar), the bottom door from its bottom-right */
+.hero .door[data-house="v1"] .door-foot{bottom:auto;top:64px}
+.hero .door[data-house="v1"]::after{background:linear-gradient(to bottom,rgba(16,18,22,.8) 0%,rgba(16,18,22,.36) 34%,rgba(16,18,22,.06) 62%,rgba(16,18,22,.2) 100%)}
+.door-num{font-family:'Boska',Georgia,serif;font-style:italic;font-weight:400;font-size:clamp(26px,2.6vw,40px);line-height:1;color:var(--salt);opacity:.9}
+.door-name{font-family:'Boska',Georgia,serif;font-weight:400;font-size:clamp(28px,3.2vw,48px);line-height:1.05;letter-spacing:-.01em;margin:0;color:var(--salt);position:relative;display:inline-block}
+.door-name::after{content:'';position:absolute;left:0;right:0;bottom:-4px;height:1px;background:var(--salt);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--e-out)}
+.door[data-house="v2"] .door-name::after{transform-origin:right}
+.door-spec,.door-more{font-size:clamp(9.5px,.8vw,11.5px);letter-spacing:.18em;color:rgba(243,241,236,.88)}
+.door-spec,.door-more,.door-cue{opacity:0;transform:translateY(12px);transition:opacity .35s linear,transform .55s var(--e-out)}
+.door-more{transition-delay:.06s}
+.door-cue{margin-top:12px;display:inline-flex;align-items:center;gap:10px;font-family:'Switzer',sans-serif;font-size:14px;color:var(--salt);min-height:24px;transition-delay:.12s}
+.door-cue i{display:block;width:26px;height:1px;background:var(--salt);transform-origin:left;transition:transform .24s var(--e-out)}
+.door[data-house="v2"] .door-cue{flex-direction:row-reverse}
+.door[data-house="v2"] .door-cue i{transform-origin:right}
+.door--opener .door-spec,.door--opener .door-more,.door--next .door-spec{opacity:1;transform:none}
+.door--opener .door-cue{display:none}
+.door--next .door-cue{opacity:1;transform:none}
+.door--next{display:block;height:var(--hero-h);min-height:0}
+/* the wordmark on the seam, page-centred; never moves when a door grows */
+.hero-mark{position:absolute;inset:0;z-index:3;display:grid;place-items:center;align-content:center;gap:16px;pointer-events:none;color:var(--salt)}
+.wm{margin:0;font-family:'Boska',Georgia,serif;font-weight:500;font-size:clamp(44px,8vw,132px);line-height:1;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;text-align:center}
+.wm .wl{display:block;overflow:hidden;padding:.14em .1em .08em;margin:-.14em -.1em -.08em}
+.wm .wl > span{display:block}
+.wm-sub{color:rgba(243,241,236,.88);letter-spacing:.24em;font-size:11px;text-align:center}
+/* hover (fine pointer): the pointed door grows to 63 %, its lines rise, the other door's name dims */
+@media (hover:hover) and (pointer:fine){
+  .door-media img{will-change:transform}
+  .doors:hover .door,.doors .door:hover{flex-grow:1}
+  .doors .door:hover{flex-grow:1.7}
+  .door:hover .door-media img{transform:scale(1)}
+  .door:hover .door-spec,.door:hover .door-more,.door:hover .door-cue{opacity:1;transform:none}
+  .door:hover .door-cue i{transform:scaleX(1.7)}
+  .door:hover .door-name::after{transform:scaleX(1)}
+  .doors:hover .door:not(:hover) .door-name,.doors:hover .door:not(:hover) .door-num{opacity:.45}
+  .doors:hover .door:not(:hover) .door-foot{opacity:1;transform:none}
+  .doors:hover .door:not(:hover)::before{opacity:0}
+  .hero:has(.bar a:hover) .door{flex-grow:1}
+}
+.door-name,.door-num{transition:opacity .25s linear}
+/* keyboard parity */
+.doors:has(.door:focus-visible) .door{flex-grow:1}
+.doors .door:focus-visible{outline:2px solid var(--salt);outline-offset:-8px;flex-grow:1.7}
+.doors .door:focus-visible .door-spec,.doors .door:focus-visible .door-more,.doors .door:focus-visible .door-cue{opacity:1;transform:none}
+.doors:has(.door:focus-visible) .door:not(:focus-visible) .door-foot{opacity:1;transform:none}
+.doors:has(.door:focus-visible) .door,.doors:has(.door:focus-visible) .door-foot{transition-duration:0s}
+/* open: the chosen door takes the whole hero; the villa page opens on the same frame */
+.doors.is-opening .door{transition:flex-grow .72s var(--e-open)}
+.doors.is-opening .door.is-opened{flex-grow:1}
+.doors.is-opening .door:not(.is-opened){flex-grow:.0001}
+.doors.is-opening .door:not(.is-opened) .door-foot{opacity:0;transition:opacity .2s ease}
+.doors.is-opening .door.is-opened .door-media img{transform:scale(1);transition:transform .8s var(--e-open)}
+.doors.is-opening .door.is-opened .door-foot{opacity:1;transform:none}
+.doors.is-opening .door.is-opened .door-spec,.doors.is-opening .door.is-opened .door-more{opacity:1;transform:none}
+.doors.is-opening .door.is-opened .door-cue{opacity:0;transition:opacity .2s ease}
+.doors.is-opening ~ .hero-mark{opacity:0;transition:opacity .25s ease}
+.doors.is-opening{pointer-events:none}
+.doors.is-resetting .door,.doors.is-resetting .door *,.doors.is-resetting .door::after{transition:none !important}
+/* intro: two veils over the photographs part from the seam (app.js adds is-ready when both decoded) */
+.veil,.curtain,.slate{display:none}
+html.js:not(.no-slate) .veil{display:grid;grid-template-rows:1fr 1fr;position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.veil i{display:block;background:var(--veil);will-change:transform;transition:transform .85s var(--e-open)}
+.hero.is-ready .veil i:first-child{transform:translateY(-100.5%)}
+.hero.is-ready .veil i:last-child{transform:translateY(100.5%)}
+html.js:not(.no-slate) .hero:not(.is-ready) .wm .wl > span{transform:translateY(112%)}
+html.js:not(.no-slate) .hero:not(.is-ready) .wm-sub,html.js:not(.no-slate) .hero:not(.is-ready) .door-foot{opacity:0}
+html.js:not(.no-slate) .hero:not(.is-ready) .door-foot{transform:translateY(14px)}
+html.js:not(.no-slate) .hero:not(.is-ready) .door-media img{transform:scale(1.14)}
+.hero.is-ready .wm .wl > span{transform:none;transition:transform .9s cubic-bezier(.22,.61,.36,1) .25s}
+.hero.is-ready .wm-sub{opacity:1;transition:opacity .6s linear 1s}
+.hero.is-ready .door-foot{opacity:1;transform:none;transition:opacity .8s linear .55s,transform .8s var(--e-out) .55s}
+.hero.is-ready .door-media img{transition:transform 2.6s cubic-bezier(.22,.61,.36,1)}
+html.js .hero:not(.is-ready) .door-media,.hero.is-ready .door-media{transform:none;transition:none}
+html.js .hero:not(.is-ready) .door .wl > span{transform:none}
+
+/* the bar: fixed, plain, constant */
+.bar{position:fixed;top:0;left:0;right:0;z-index:40;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:0 clamp(20px,4vw,56px);color:var(--salt);pointer-events:none;
+  transition:background-color .35s ease,backdrop-filter .35s ease}
+.bar::before{content:'';position:absolute;inset:0 0 -28px 0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(16,18,22,.55) 0%,rgba(16,18,22,.3) 50%,rgba(16,18,22,0) 100%);transition:opacity .35s ease}
+.bar.is-solid{background:rgba(18,18,17,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bar.is-solid::before{opacity:0}
+.bar a{pointer-events:auto;text-decoration:none;color:inherit;position:relative}
+.bar a::before{content:'';position:absolute;left:-10px;right:-10px;top:50%;height:max(100%,44px);transform:translateY(-50%)}
+.bar-brand{font-family:'Switzer',sans-serif;font-weight:600;font-size:14px;letter-spacing:.3em;text-transform:uppercase;transition:opacity .4s ease,transform .4s var(--e-out)}
+.bar.is-home.is-brand-out .bar-brand{opacity:0;transform:translateY(-6px);pointer-events:none}
+.bar-nav{display:flex;gap:clamp(18px,2.2vw,32px);margin-left:auto}
+.bar-link{letter-spacing:.18em;font-size:11px}
+.bar a.bar-link::after{content:'';position:absolute;left:0;right:0;bottom:-4px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .3s var(--e-out)}
+.bar-cta{font-family:'Switzer',sans-serif;font-weight:500;font-size:14px;line-height:1;display:inline-flex;align-items:center;min-height:44px;padding:0 20px;
+  border:1px solid rgba(243,241,236,.7);border-radius:12px;transition:background-color .25s ease,color .25s ease,border-color .25s ease}
+@media (hover:hover) and (pointer:fine){
+  .bar a.bar-link:hover::after{transform:scaleX(1);transform-origin:left}
+  .bar-cta:hover{background:var(--salt);color:var(--forest);border-color:var(--salt)}
+}
+.bar a:focus-visible{outline:2px solid var(--salt);outline-offset:3px}
+.bar-cta::before{display:none}
+/* phones: the two halves stack, the name stays centred over the horizontal seam */
+@media (max-width:719px){
+  .hero .door-media,.door--next .door-media{top:0;height:100%;margin-top:0}
+  .door-media img{transform:none}
+  .door-foot{padding:18px 16px 20px}
+  .door[data-house="v2"] .door-foot{justify-items:start;text-align:left}
+  .door[data-house="v2"] .door-cue{flex-direction:row}
+  .door[data-house="v2"] .door-cue i{transform-origin:left}
+  .door[data-house="v2"] .door-name::after{transform-origin:left}
+  .door-more{display:none}
+  .wm{font-size:clamp(30px,8.6vw,44px);letter-spacing:.08em}
+  .hero-mark{gap:10px}
+  .door-spec{opacity:1;transform:none}
+  .door-cue{opacity:1;transform:none;margin-top:8px}
+  .wm-sub{font-size:9.5px;letter-spacing:.18em;text-align:center;padding:0 16px}
+  .bar{height:56px;padding:0 16px}
+  .bar-nav{display:none}
+  .bar-brand{font-size:12px;letter-spacing:.24em}
+  .bar-cta{min-height:40px;padding:0 14px;font-size:13px}
+}
+/* reduced motion: a plain render */
+@media (prefers-reduced-motion:reduce){
+  .veil{display:none !important}
+  .door,.door-media img,.door-foot,.door-spec,.door-more,.door-cue,.door-cue i,.door-name::after,.wm .wl > span,.wm-sub,.bar-brand{transition:none !important}
+  html.js .hero .wm .wl > span,html.js .hero .door-foot,html.js .hero .door-spec,html.js .hero .door-cue{transform:none !important;opacity:1 !important}
+  html.js .hero .wm-sub{opacity:1 !important}
+  html.js .hero .door-media img{transform:scale(1.05) !important}
+}
+
+
+
+/* ================= V4: VIKING NORDIC (22 Oct 2026, late) =================
+   Sindri: "viking nordic mountain villas, two luxury villas in the country, it needs to scream
+   modern, premium". Monochrome: basalt #121211 ground, salt type, one ash #E6E4DE band (the
+   ritual, the quote, the dates). Special Gothic Expanded One for the wordmark and the numerals
+   (outlined, Akureyri Lodge's second voice), Special Gothic Bold for titles in two staggered
+   lines (Tengile), General Sans body, JetBrains Mono facts. Radius 0 everywhere. The v3 door
+   mechanics stay; this layer re-dresses them. */
+.wm{font-family:var(--display);font-weight:400;font-size:clamp(40px,8.4vw,140px);letter-spacing:.02em;line-height:.96}
+.wm-sub{letter-spacing:.26em}
+.door-num,.dip-num,.stay-card-num,.door-ghost{font-family:var(--display);font-weight:400;line-height:1;
+  color:transparent;-webkit-text-stroke:1.5px var(--salt);text-stroke:1.5px var(--salt);text-transform:uppercase;font-style:normal}
+.door-num{font-size:clamp(36px,4.4vw,72px);opacity:1;transition:color .3s linear,opacity .25s linear}
+.door-name{font-family:var(--gothic);font-weight:700;font-size:clamp(20px,2.3vw,34px);line-height:1.05;letter-spacing:.04em;text-transform:uppercase}
+.door-name::after{bottom:-6px}
+.door-spec,.door-more{font-size:clamp(10px,.8vw,11.5px);letter-spacing:.18em}
+.door-cue{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+/* the signature: a huge outlined numeral, cut by the door's edge (White Desert), on the side away from the text */
+.door-ghost{position:absolute;z-index:1;pointer-events:none;font-size:min(22vw,calc(var(--hero-h) * .36));letter-spacing:-.02em;
+  -webkit-text-stroke:2px rgba(243,241,236,.85);text-stroke:2px rgba(243,241,236,.85);
+  opacity:0;transform:translateY(6%) scale(.94);transition:opacity .25s linear,transform .5s var(--e-door)}
+.door[data-house="v1"] .door-ghost{right:clamp(18px,3vw,44px);top:calc(64px + 2vh);transform-origin:right top}
+.door[data-house="v2"] .door-ghost{left:clamp(18px,3vw,44px);bottom:clamp(8px,2vh,24px);transform:translateY(-6%) scale(.94);transform-origin:left bottom}
+.door--opener .door-ghost,.door--next .door-ghost{display:none}
+@media (hover:hover) and (pointer:fine){
+  .doors .door:hover .door-ghost{opacity:.9;transform:none;transition:opacity .45s linear,transform .9s var(--e-door)}
+  .doors .door:hover .door-num{color:var(--salt)}
+}
+.doors .door:focus-visible .door-num{color:var(--salt)}
+.doors.is-opening .door.is-opened .door-ghost{opacity:0;transition:opacity .2s ease}
+/* bar */
+.bar-brand{font-family:var(--display);font-weight:400;font-size:12px;letter-spacing:.14em}
+.bar-cta{font-family:var(--body);font-weight:500;border-radius:0;pointer-events:auto;background:transparent;color:inherit;cursor:pointer;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.bar button{pointer-events:auto}
+.bar .bar-cta:focus-visible{outline:2px solid var(--salt);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){ .bar-cta:hover{background:var(--salt);color:var(--basalt);border-color:var(--salt)} }
+/* titles: Special Gothic Bold, two staggered lines */
+.ch-title,.stay-title,.big-quote p,.bk-h{font-family:var(--gothic);font-weight:700;text-transform:uppercase;letter-spacing:-.01em}
+.ch-title{font-size:clamp(34px,5vw,84px);line-height:.96}
+.ch-title.stag{grid-column:a / d;max-width:none}
+.stag .stag-a,.stag .stag-b{display:block}
+.stag .stag-b{padding-left:clamp(32px,12vw,220px)}
+.ch-lede{font-family:var(--body);font-weight:400;font-size:clamp(20px,1.8vw,28px);line-height:1.35;letter-spacing:-.012em;max-width:30em}
+.ch-text p:not(.meta){font-size:17px;line-height:1.6}
+/* the cue: a rule that stretches, everywhere (doors, diptych, cards) */
+.cue{display:inline-flex;align-items:center;gap:10px;color:inherit;text-decoration:none;min-height:24px;cursor:pointer;background:none;border:0;padding:0;font:inherit;text-align:left}
+.cue.meta{font-size:11px;letter-spacing:.18em}
+button.cue{min-height:44px}
+.cue{gap:8px}
+.cue::after{content:'\2192';display:block;font-family:var(--body);font-size:16px;line-height:1;transition:transform .3s var(--e-out)}
+@media (hover:hover) and (pointer:fine){ .cue:hover::after,.dip:hover .cue::after,.stay-card:hover .cue::after{transform:translateX(5px)} }
+.cue:focus-visible{outline:2px solid var(--salt);outline-offset:4px}
+/* the proof band under the hero: icon in a hairline ring, the value in the display face counting up on
+   reveal, a mono label; four cells with hairline dividers, 2 x 2 on phones */
+.stats{list-style:none;margin:0;padding:0 var(--padR) 0 var(--padL);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+  border-bottom:1px solid var(--hair);background:var(--basalt);color:var(--salt)}
+.stats li{display:grid;gap:14px;align-content:start;padding:clamp(28px,3.2vw,44px) clamp(20px,2.4vw,36px) clamp(28px,3.2vw,44px) clamp(20px,2.4vw,36px);border-left:1px solid var(--hair)}
+.stats li:first-child{border-left:0;padding-left:0}
+.stats .ico{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(243,241,236,.35);border-radius:50%;color:var(--salt);margin-bottom:6px}
+.stats .ico svg{display:block;width:22px;height:22px}
+.stats b{font-family:var(--display);font-weight:400;font-size:clamp(26px,2.6vw,44px);line-height:1;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stats b span{font:inherit;letter-spacing:inherit}
+.stats li > span:last-child{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--salt-72);line-height:1.6;max-width:16em}
+/* statement */
+.statement{padding-top:clamp(96px,11vw,176px)}
+.statement-meta{grid-column:b / d;color:var(--salt-72);margin-top:8px}
+/* the houses: Velaa's diptych, each portrait a door */
+.houses-ch{padding-top:clamp(96px,11vw,176px)}
+.diptych{grid-column:a / d;display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,3vw,56px);margin-top:clamp(28px,4vw,56px)}
+.dip{display:grid;gap:22px;text-decoration:none;color:inherit;align-content:start}
+.dip-media{display:block;position:relative;aspect-ratio:1 / 1;overflow:hidden;background:#1b1a19}
+.dip-media img{width:100%;height:100%;object-fit:cover;transform:scale(1.05);transition:transform .7s var(--e-door)}
+.dip-text{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 22px;align-items:start}
+.dip-num{grid-row:1 / span 4;font-size:clamp(56px,6.4vw,104px);line-height:.85;transition:color .3s linear}
+.dip-name{font-family:var(--gothic);font-weight:700;font-size:clamp(22px,2.1vw,32px);line-height:1.05;letter-spacing:.03em;text-transform:uppercase}
+.dip-sell{font-size:17px;line-height:1.5;max-width:28em;color:var(--salt-72)}
+.dip-spec{color:var(--salt-72)}
+.dip .cue{margin-top:6px}
+.dip:focus-visible{outline:2px solid var(--salt);outline-offset:6px}
+@media (hover:hover) and (pointer:fine){
+  .dip:hover .dip-media img{transform:scale(1);transition-duration:1.1s}
+  .dip:hover .dip-num{color:var(--salt)}
+}
+.dip-both{grid-column:a / d;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-top:clamp(24px,3vw,40px);padding-top:20px;border-top:1px solid var(--hair);color:var(--salt-72)}
+.dip-both .cue{color:var(--salt)}
+/* the ash band: the ritual, the quote, the dates */
+.ritual,.said,.stay{--salt:#121211;--salt-72:rgba(18,18,17,.68);--hair:rgba(18,18,17,.18);--ink:#E6E4DE;background:var(--ash);color:var(--basalt)}
+.ritual{padding-top:clamp(96px,11vw,176px)}
+.ritual-lede{grid-column:b / d;max-width:30em;font-size:clamp(18px,1.5vw,22px);line-height:1.45;color:var(--salt-72)}
+.trip{grid-column:a / d;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,2.6vw,40px);margin-top:clamp(28px,4vw,56px)}
+.trip-f{margin:0;display:grid;gap:18px;align-content:start}
+.trip-media{display:block;aspect-ratio:4 / 5;overflow:hidden;background:#d6d3cb}
+.trip-media img{width:100%;height:100%;object-fit:cover}
+.trip-f figcaption{display:grid;gap:6px}
+.trip-f figcaption .meta{color:var(--salt-72)}
+.trip-f figcaption b{font-family:var(--gothic);font-weight:700;font-size:clamp(18px,1.5vw,22px);line-height:1.1;text-transform:uppercase;letter-spacing:.03em}
+.trip-f figcaption span:last-child{font-size:16px;line-height:1.5;color:var(--salt-72);max-width:24em}
+/* the quote */
+.said{padding-top:clamp(96px,11vw,176px)}
+.said .big-quote{grid-column:a / d;grid-row:1;margin:0}
+.big-quote p{font-size:clamp(30px,5vw,88px);line-height:.96;max-width:11em;text-wrap:balance}
+.big-quote footer{margin-top:22px;color:var(--salt-72)}
+.said .scores{grid-column:a / b;grid-row:2;margin-top:clamp(32px,4vw,56px);padding-top:24px;border-top:1px solid var(--hair);font-size:16px;line-height:1.5;color:var(--salt-72);max-width:22em}
+.said .scores b{font-family:var(--gothic);font-weight:700;font-size:40px;line-height:1;display:block;margin-bottom:8px;color:var(--basalt)}
+.said .quotes{grid-column:b / d;grid-row:2;margin-top:clamp(32px,4vw,56px);padding-top:24px;border-top:1px solid var(--hair);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
+.said .quote p{font-size:17px;line-height:1.45;letter-spacing:0;max-width:none}
+.said .quote figcaption{margin-top:12px}
+/* the dates: three cards, each opens the sheet on that house */
+.stay{padding-top:clamp(96px,11vw,176px)}
+.stay > :not(.stay-cal){grid-column:a / d;margin-right:0}
+.stay-lede{grid-column:b / d;max-width:32em;font-size:clamp(18px,1.5vw,22px);line-height:1.45;color:var(--salt-72)}
+.stay-cards{grid-column:a / d;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:clamp(28px,4vw,48px)}
+.stay-card{appearance:none;background:transparent;border:1px solid var(--hair);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  display:grid;gap:10px;align-content:end;min-height:clamp(200px,22vw,280px);padding:24px;transition:border-color .25s ease,background-color .25s ease}
+.stay-card-num{font-size:clamp(44px,4.6vw,72px);line-height:.85;margin-bottom:auto;transition:color .3s linear}
+.stay-card-name{font-family:var(--gothic);font-weight:700;font-size:20px;line-height:1.1;text-transform:uppercase;letter-spacing:.03em}
+.stay-card .meta{color:var(--salt-72)}
+.stay-card.is-on{border-color:var(--basalt)}
+.stay-card.is-on .stay-card-num{color:var(--basalt)}
+.stay-card:focus-visible{outline:2px solid var(--basalt);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){ .stay-card:hover{border-color:var(--basalt);background:rgba(18,18,17,.04)} .stay-card:hover .stay-card-num{color:var(--basalt)} }
+/* the SNDR Bókun sheet in this skin (its own rules in assets/vendor/sndr-booking.css) */
+dialog.bk{--forest:#121211;--secondary:rgba(18,18,17,.74);--line:rgba(18,18,17,.16);--mist:#E6E4DE;--bar:#121211;--ease:var(--e-out);
+  --display:'Special Gothic','Special Gothic Expanded One',sans-serif;--body:'General Sans',system-ui,sans-serif;
+  --salt:#121211;--salt-72:rgba(18,18,17,.62);--hair:rgba(18,18,17,.16);--ink:#fff;color:#121211}
+.bk-bg{transition:opacity .35s linear}
+.bk[open] .bk-bg{opacity:1}
+.bk-bar{transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s linear}
+.bk[open] .bk-bar{transform:none;opacity:1}
+@starting-style{.bk[open] .bk-bar{transform:translateX(24px);opacity:0}.bk[open] .bk-bg{opacity:0}}
+.bk-h{font:700 26px/1.05 var(--display);letter-spacing:.01em;text-transform:uppercase}
+.bk-sub{font-family:var(--body)}
+.bk-range{font:500 22px/1.2 var(--display);letter-spacing:0}
+.bk-m-t{font:500 18px/1.2 var(--display);text-transform:uppercase;letter-spacing:.04em}
+.bk-house{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0 18px}
+.bk-house button{appearance:none;background:transparent;border:1px solid var(--line);color:inherit;font:500 13px/1 var(--body);padding:0 14px;min-height:44px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:background-color .2s ease,color .2s ease,border-color .2s ease}
+.bk-house button span{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em}
+.bk-house button[aria-pressed="true"]{background:var(--forest);color:#fff;border-color:var(--forest)}
+.bk-house button:focus-visible{outline:2px solid var(--forest);outline-offset:3px}
+.bk .btn{appearance:none;border:1px solid var(--forest);background:var(--forest);color:#fff;font:500 15px/1 var(--body);letter-spacing:.02em;min-height:52px;padding:0 24px;width:100%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .2s ease,color .2s ease}
+.bk .btn:disabled{opacity:.4;cursor:default}
+.bk .text-link{appearance:none;background:none;border:0;padding:0;color:inherit;font:400 14px/1.4 var(--body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bk .fine-print{font-size:13px;color:var(--secondary);margin-top:12px}
+.bk input,.bk textarea{font-family:var(--body);border-radius:0}
+html.bk-open{overflow:hidden}
+/* the door foot, re-set (Sindri 22 Oct late): one tight block; a hairline draws across it on hover,
+   the two mono lines sit under the line, the cue is mono with an arrow, no stray dash */
+.hero .door-foot,.door--next .door-foot{left:0;right:auto;width:auto;max-width:min(560px,62vw);gap:0;justify-items:stretch}
+.hero .door[data-house="v2"] .door-foot,.door--next.door[data-house="v2"] .door-foot{left:auto;right:0}
+.door-num{margin-bottom:10px}
+.door-name::after{display:none}
+.door-spec{margin-top:16px;padding-top:12px;position:relative}
+.door-spec::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:rgba(243,241,236,.7);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--e-out)}
+.door[data-house="v2"] .door-spec::before{transform-origin:right}
+.door-more{margin-top:6px}
+.door-cue{margin-top:18px;gap:8px}
+.door[data-house="v2"] .door-cue{flex-direction:row;justify-self:end}
+.door-cue i{width:auto;height:auto;background:none;transform:none;transition:transform .3s var(--e-out)}
+.door-cue i::before{content:'\2192';display:block;font-family:var(--body);font-size:16px;line-height:1}
+@media (hover:hover) and (pointer:fine){
+  .door:hover .door-spec::before,.doors .door:focus-visible .door-spec::before{transform:scaleX(1);transition-delay:.05s}
+  .door:hover .door-cue i{transform:translateX(5px)}
+}
+.door--opener .door-spec::before,.door--next .door-spec::before{transform:scaleX(1)}
+@media (max-width:719px){
+  .hero .door-foot{max-width:none;right:0}
+  .door-spec::before{transform:scaleX(1)}
+  .door-cue{margin-top:12px}
+}
+/* villa pages: the sub-titles and feature heads in the same gothic voice */
+.ch-sub{font-family:var(--gothic);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(26px,2.6vw,42px)}
+.feat-list h3{font-family:var(--gothic);font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:clamp(17px,1.3vw,21px)}
+.foot-mark{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(40px,8.2vw,150px)}
+/* phones */
+@media (max-width:899px){
+  .stats{grid-template-columns:1fr 1fr;gap:0}
+  .stats li{padding:22px 0 22px 18px;gap:10px}
+  .stats .ico{width:40px;height:40px}
+  .stats .ico svg{width:18px;height:18px}
+  .stats b{font-size:24px}
+  .stats li:nth-child(odd){border-left:0;padding-left:0;padding-right:18px}
+  .stats li:nth-child(n+3){border-top:1px solid var(--hair)}
+  .ch-title{font-size:clamp(32px,9vw,56px)}
+  .stag .stag-b{padding-left:clamp(20px,8vw,64px)}
+  .ch-lede,.statement-meta,.ritual-lede,.stay-lede{grid-column:a / d}
+  .diptych,.trip,.stay-cards,.said .quotes{grid-template-columns:1fr}
+  .said .scores,.said .quotes{grid-column:a / d}
+  .said .quotes{grid-row:3}
+  .dip-text{grid-template-columns:auto minmax(0,1fr)}
+  .door-ghost{display:none}
+  .wm{font-size:clamp(26px,8.2vw,40px);letter-spacing:.03em;white-space:normal;line-height:.95;max-width:92vw}
+  .stay-card{min-height:0;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:18px;align-items:center}
+  .stay-card-num{grid-row:1 / span 3;margin:0;font-size:44px}
+}
+@media (prefers-reduced-motion:reduce){
+  .door-ghost,.dip-media img,.dip-num,.door-num,.cue::before,.stay-card-num,.bk-bar,.bk-bg{transition:none !important}
+  .door-ghost{transform:none}
+}
+
+/* ================= THE MAP, INTERACTIVE (22 Oct late) =================
+   Sindri: "make this be interacted with and really make it a signature piece". The real road from
+   the houses (OSRM, _parts/osrm-routes.json) draws itself to the place you point at, in the list
+   or on the map; the point lights and says km · min. When the map scrolls in, the Golden Circle
+   draws itself one road at a time until the visitor points at something. */
+.m-route{fill:none;stroke:var(--salt);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
+  stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset .5s var(--e-out),opacity .2s linear .3s}
+.m-route.is-on{stroke-dashoffset:0;opacity:1;transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1),opacity .2s linear}
+.map-pt i{transition:transform .3s var(--e-out),background-color .3s linear}
+.map-pt.is-on i{background:var(--salt);transform:scale(1.5)}
+.map-pt.is-on i::after{content:'';position:absolute;inset:-7px;border:1px solid var(--salt);border-radius:50%;animation:m-pulse 1.8s cubic-bezier(.22,1,.36,1) infinite}
+@keyframes m-pulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.map-pt b{transition:color .25s linear}
+.map-pt.is-on b{color:var(--salt)}
+.map-km{display:none;position:absolute;white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;line-height:1.5;letter-spacing:.02em;text-transform:uppercase;color:var(--salt);background:#22211e;padding:0 2px}
+.map-pt.is-on .map-km{display:block}
+.map-pt[data-side="r"] .map-km{left:9px;top:.75em}
+.map-pt[data-side="l"] .map-km{right:9px;top:.75em}
+.map-pt[data-side="tr"] .map-km{left:7px;top:-.4em}
+.map-pt[data-side="bl"] .map-km{right:7px;top:1.9em}
+.map-pt[data-side="b"] .map-km{left:0;top:34px;transform:translateX(-50%)}
+.map.has-sel .map-pt:not(.is-on):not(.map-pt--home) b{color:rgba(243,241,236,.45)}
+.places li{padding:0}
+.place{appearance:none;background:none;border:0;width:100%;display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:6px 0;font:inherit;color:inherit;cursor:pointer;text-align:left;transition:opacity .25s linear,color .25s linear}
+.place span:last-child{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--salt-72);transition:color .25s linear}
+.place span:last-child:not(:empty)::after{content:'\00a0km'}
+.places.has-sel .place:not(.is-on){opacity:.45}
+.place.is-on span:last-child{color:var(--salt)}
+.place:focus-visible{outline:2px solid var(--salt);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .m-route,.m-route.is-on{transition:opacity .2s linear}
+  .map-pt.is-on i::after{animation:none;opacity:.6;transform:none}
+}
+
+/* ================= REVIEWS, ONE AT A TIME (22 Oct late) =================
+   Sindri: "get some of their reviews really elegantly flipping through each one". One verbatim
+   sentence from a 5-star review at a time, in the title voice; the words leave upward through
+   their masks and the next ones rise in with a 28 ms stagger; a hairline fills over the 7 s before
+   the next one; arrows, keys, swipe; paused while pointed at or focused. Reduced motion: a cut. */
+.rq{grid-column:a / d;grid-row:1;display:grid;gap:clamp(28px,4vw,48px)}
+.rq-stage{margin:0;min-height:clamp(200px,24vw,340px);display:grid;grid-template-columns:minmax(0,1fr);align-content:start;justify-items:start}
+.said .rq-stage > *{grid-column:1;grid-row:auto}
+.rq-stage figcaption{margin-top:22px}
+.rq{padding-left:0}
+@media (min-width:900px){ .rq-stage{padding-left:calc(25cqw)} }
+.rq-q{font-size:clamp(30px,5vw,88px);line-height:.96;max-width:12em;text-wrap:balance}
+.rq-q[data-len="l"]{font-size:clamp(24px,3.3vw,56px);line-height:1.02;max-width:17em}
+.rq-q .tw{padding:.08em .04em .12em;margin:-.08em -.04em -.12em}
+.rq-q .tw > span{transition:transform .75s var(--e-out),opacity .45s linear;transition-delay:calc(var(--i,0) * 28ms)}
+.rq.is-out .rq-q .tw > span{transform:translateY(-112%);opacity:0;transition:transform .45s cubic-bezier(.6,0,.4,1),opacity .3s linear;transition-delay:calc(var(--i,0) * 12ms)}
+.rq.is-enter .rq-q .tw > span{transform:translateY(112%);opacity:0;transition:none}
+.rq-who{margin-top:22px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 0;color:var(--salt-72);transition:opacity .35s linear .25s}
+.rq.is-out .rq-who{opacity:0;transition-delay:0s}
+.rq-sep{opacity:.5;margin:0 10px}
+.rq-bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(16px,3vw,40px);padding-top:20px;border-top:1px solid var(--hair)}
+.rq-count{color:var(--salt-72);letter-spacing:.12em}
+.rq-count .rq-i{color:var(--basalt)}
+.rq-line{display:block;height:1px;background:var(--hair);position:relative;overflow:hidden}
+.rq-line i{position:absolute;inset:0;background:var(--basalt);transform:scaleX(0);transform-origin:left}
+.rq-line.is-timing i{transform:scaleX(1);transition:transform 7s linear}
+.rq-ctl{display:flex;gap:8px}
+.rq-ctl button{appearance:none;background:none;border:1px solid var(--hair);color:inherit;width:44px;height:44px;display:grid;place-items:center;font:400 18px/1 var(--body);cursor:pointer;transition:border-color .2s linear,background-color .2s linear,color .2s linear}
+.rq-ctl button:focus-visible{outline:2px solid var(--basalt);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){ .rq-ctl button:hover{background:var(--basalt);color:var(--ash);border-color:var(--basalt)} }
+.said .scores{grid-column:a / b;grid-row:2}
+@media (max-width:899px){ .rq-q{font-size:clamp(28px,8vw,44px)} .rq-q[data-len="l"]{font-size:clamp(20px,5.6vw,30px)} .rq-stage{min-height:0} .rq-who{font-size:10px} }
+@media (prefers-reduced-motion:reduce){ .rq-q .tw > span,.rq.is-out .rq-q .tw > span,.rq-who{transition:none !important} .rq-line.is-timing i{transition:none;transform:scaleX(0)} }
+
+/* ================= THE LAST DOOR: the footer (22 Oct late) =================
+   Sindri: "this entire footer is trash, needs to be more of a signature piece". The aurora over the
+   field, drifting slowly; the coordinates; one sentence; the button; the two houses as the two
+   outlined numerals; the small facts; and the wordmark cut by the bottom edge of the page. */
+.foot{position:relative;overflow:hidden;display:block;padding:0;border-top:0;background:var(--basalt);color:var(--salt);min-height:min(100svh,980px)}
+.foot-sky{position:absolute;inset:0;z-index:0;pointer-events:none}
+.foot-sky img{width:112%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%;opacity:.55;animation:foot-drift 60s linear infinite alternate}
+@keyframes foot-drift{from{transform:translateX(0)}to{transform:translateX(-10.7%)}}
+.foot::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,var(--basalt) 0%,rgba(18,18,17,.55) 28%,rgba(18,18,17,.35) 60%,rgba(18,18,17,.82) 100%)}
+.foot-in{position:relative;z-index:2;display:grid;grid-template-columns:[a] minmax(0,1fr) [b] auto [c];gap:clamp(28px,4vw,56px) clamp(32px,6vw,120px);align-items:start;
+  padding:clamp(96px,12vw,180px) var(--padR) clamp(140px,16vw,240px) var(--padL)}
+.foot-coords{grid-column:a;color:var(--salt-72);letter-spacing:.2em}
+.foot-title{grid-column:a;font-family:var(--gothic);font-weight:700;text-transform:uppercase;letter-spacing:-.01em;font-size:clamp(30px,4.2vw,68px);line-height:.98;max-width:12em;margin:0}
+.foot-cta{grid-column:a;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:6px}
+.foot-cta .meta{color:var(--salt-72)}
+.btn-salt{appearance:none;cursor:pointer;background:var(--salt);color:var(--basalt);border:1px solid var(--salt);font:500 13px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;min-height:48px;padding:0 26px;display:inline-flex;align-items:center;transition:background-color .2s linear,color .2s linear}
+@media (hover:hover) and (pointer:fine){ .btn-salt:hover{background:transparent;color:var(--salt)} }
+.btn-salt:focus-visible{outline:2px solid var(--salt);outline-offset:3px}
+.foot-doors{grid-column:b;grid-row:1 / span 3;display:grid;grid-template-columns:auto auto;gap:clamp(24px,3vw,56px);align-self:start}
+.foot-door{display:grid;gap:8px;justify-items:start;text-decoration:none;color:inherit}
+.foot-door-num{font-family:var(--display);font-weight:400;font-size:clamp(96px,11vw,200px);line-height:.85;color:transparent;-webkit-text-stroke:1.5px var(--salt);text-stroke:1.5px var(--salt);transition:color .3s linear}
+.foot-door-name{font-family:var(--gothic);font-weight:700;font-size:18px;line-height:1.1;text-transform:uppercase;letter-spacing:.03em;margin-top:8px}
+.foot-door .meta{color:var(--salt-72)}
+@media (hover:hover) and (pointer:fine){ .foot-door:hover .foot-door-num{color:var(--salt)} }
+.foot-door:focus-visible{outline:2px solid var(--salt);outline-offset:6px}
+.foot-cols{grid-column:a / c;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;padding-top:28px;border-top:1px solid var(--hair);margin-top:clamp(24px,4vw,56px)}
+.foot-cols p{font-size:15px;line-height:1.5}
+.foot-cols .meta{color:var(--salt-72);margin-bottom:8px}
+.foot-cols a{text-decoration:none;border-bottom:1px solid var(--hair);transition:border-color .2s linear}
+@media (hover:hover) and (pointer:fine){ .foot-cols a:hover{border-color:var(--salt)} }
+.foot-base{grid-column:a / c;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin:0}
+.foot-base a{text-decoration:none;color:var(--salt-72);transition:color .2s linear}
+.foot-base a:hover{color:var(--salt)}
+.foot-mark{position:absolute;z-index:2;left:0;right:0;bottom:0;margin:0;pointer-events:none;text-align:center;white-space:nowrap;
+  font-family:var(--display);font-weight:400;font-size:clamp(40px,7.05vw,128px);line-height:1;letter-spacing:0;text-transform:uppercase;color:var(--salt);
+  transform:translateY(.22em)}
+@media (max-width:899px){
+  .foot-in{grid-template-columns:1fr;padding-bottom:clamp(96px,22vw,140px)}
+  .foot-doors{grid-column:1;grid-row:auto;grid-template-columns:1fr 1fr;gap:16px}
+  .foot-door-num{font-size:84px}
+  .foot-cols{grid-column:1;grid-template-columns:1fr;gap:18px}
+  .foot-base{grid-column:1}
+  .foot-mark{font-size:clamp(40px,13.4vw,64px);white-space:normal;line-height:.9;transform:translateY(.16em);padding:0 8px}
+}
+@media (prefers-reduced-motion:reduce){ .foot-sky img{animation:none} }
+
+/* ================= SEAMLESS DOOR -> PAGE (22 Oct late) =================
+   Sindri: "completely seamless and flowy, like nothing is jumping between different sites".
+   The villa page's opener must be the exact last frame of the opened door: same scrim, same foot
+   corner, same text block width, the cue keeps its height (hidden, not removed), the numeral
+   filled as it was on hover. Both villa pages are prerendered from the home (speculation rules), so
+   the navigation is instant; the cross-document view transition crossfades two identical frames. */
+.door--opener[data-house="v1"] .door-foot{bottom:auto;top:64px}
+.door--opener[data-house="v1"]::after{background:linear-gradient(to bottom,rgba(16,18,22,.8) 0%,rgba(16,18,22,.36) 34%,rgba(16,18,22,.06) 62%,rgba(16,18,22,.2) 100%)}
+.door--opener .door-foot{left:0;right:auto;width:auto;max-width:min(560px,62vw);gap:0;justify-items:stretch}
+.door--opener[data-house="v2"] .door-foot{left:auto;right:0}
+.door--opener .door-cue{display:inline-flex;visibility:hidden;opacity:0}
+.door--opener .door-num{color:var(--salt)}
+.doors.is-opening .door.is-opened .door-num{color:var(--salt)}
+.doors.is-opening .door.is-opened .door-spec::before{transform:scaleX(1)}
+.doors.is-opening .door.is-opened .door-cue{visibility:hidden}
+html.is-arrived .bar-brand{animation:bar-brand-in .5s var(--e-out) .15s both}
+@keyframes bar-brand-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (max-width:719px){ .door--opener[data-house="v1"] .door-foot{top:56px} .door--opener .door-foot{max-width:none;right:0} }
+
+/* the map, edge to edge (Sindri 22 Oct late): the plate breaks out of the chapter gutters and is
+   cropped to a cinema band; the dots keep their % positions on the uncropped canvas */
+.around .around-maps{grid-column:a / d;grid-template-columns:1fr;gap:0;margin:clamp(28px,4vw,56px) calc(var(--padR) * -1) 0 calc(var(--padL) * -1)}
+.map--region{position:relative;height:clamp(420px,78vh,880px);overflow:hidden;background:#22211e}
+.map--region .map-canvas{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100%}
+.map--region .map-cap{position:absolute;left:var(--padL);right:var(--padR);bottom:14px;margin:0;z-index:2;font-size:12px;color:rgba(243,241,236,.62);pointer-events:none}
+.map--region .map-cap span,.map--region .map-cap{background:none}
+.map-edge--s{bottom:40px}
+@media (max-width:899px){ .map--region{height:auto;aspect-ratio:1000/763;max-height:none} .map--region .map-canvas{position:absolute;top:0;transform:none} .map--region .map-cap{display:none} }
+
+/* ================= V5 POLISH (22 Oct, night): the layout pass =================
+   Sindri: "a lot of broken ui ... a lot of layouts and things have been done poorly". Every chapter
+   gets its own shape (no two in a row share "staggered title left, paragraph right"): the statement
+   is left-heavy, the map and the dates run title and lede on one row, the ritual stays right-heavy.
+   Captions in mono, the proof labels on one line, the review score inside the carousel's bar, the
+   footer on one column on phones, the villa page's dates as a pair. Mono raised to 12 px. */
+body{background:var(--basalt)}
+:root{--m:clamp(11.5px,calc(var(--F) * .13),13px)}
+.door-spec,.door-more{font-size:clamp(11px,.85vw,12px);letter-spacing:.16em}
+.door-cue,.cue.meta{font-size:12px;letter-spacing:.16em}
+/* proof band */
+.stats li > span:last-child{font-size:11.5px;letter-spacing:.12em;white-space:nowrap;max-width:none}
+.stats li{padding-top:clamp(28px,3vw,40px);padding-bottom:clamp(28px,3vw,40px)}
+/* statement: left-heavy, the lede under the title on the left two thirds */
+.statement .ch-lede{grid-column:a / c;max-width:24em;font-size:clamp(21px,2vw,30px);line-height:1.3}
+.statement-meta{grid-column:a / c}
+/* the land: the caption as a mono line under the photograph, right-set, on basalt */
+.bleed .cap,.duo .cap{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--salt-72);line-height:1.5}
+.bleed .cap{padding:16px var(--padR) 0 var(--padL);text-align:right;margin:0}
+/* the map chapter: one-line title and lede on one row, the plate full-bleed, the note with air below */
+.around{padding-top:clamp(72px,8vw,128px);padding-bottom:clamp(80px,9vw,140px)}
+.around .ch-title{grid-column:a / c;grid-row:1;max-width:9.5em;padding-right:4cqw}
+.around .ch-lede{grid-column:c / d;grid-row:1;align-self:end;max-width:18em;font-size:clamp(18px,1.4vw,21px);line-height:1.45;color:var(--salt-72);padding-bottom:.35em}
+.around .around-maps{grid-row:2}
+.around .places{grid-row:3;margin-top:clamp(32px,4vw,56px)}
+.around .places-note{grid-row:4;margin-top:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--salt-72)}
+/* the quote bar carries the score; the orphan "5.0" block is gone */
+.rq-bar{grid-template-columns:auto auto minmax(0,1fr) auto}
+.rq-score{color:var(--salt-72);letter-spacing:.1em;white-space:nowrap}
+.rq-score b{font-weight:400;color:var(--basalt)}
+/* the dates: one-line title and lede on one row; cards fill the row whatever their number */
+.stay > .ch-title{grid-column:a / c;grid-row:1;max-width:8em;padding-right:4cqw;margin-right:0}
+.stay > .stay-lede{grid-column:c / d;grid-row:1;align-self:end;max-width:18em;padding-bottom:.35em;margin-right:0}
+.stay > .stay-cards{grid-row:2}
+.stay-cards{grid-row:2;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+/* the villa page's spa pair: the two frames share a baseline */
+.duo{align-items:end}
+.duo .cap{padding-top:12px}
+/* the footer: one column on phones, the button never wraps */
+.btn-salt{white-space:nowrap}
+.foot-title{text-wrap:balance}
+@media (max-width:899px){
+  .foot-in{grid-template-columns:[a] minmax(0,1fr) [c]}
+  .foot-coords,.foot-title,.foot-cta,.foot-doors,.foot-cols,.foot-base{grid-column:a / c;grid-row:auto}
+  .foot-cta .meta{flex-basis:100%}
+  .ch-title{font-size:clamp(30px,8vw,56px)}
+  .stag .stag-b{padding-left:clamp(16px,6vw,48px)}
+  .around .ch-title,.around .ch-lede,.stay > .ch-title,.stay > .stay-lede{grid-column:a / d;grid-row:auto;align-self:start;padding:0;max-width:none}
+  .around{padding-bottom:clamp(64px,14vw,96px)}
+  .rq-bar{grid-template-columns:auto minmax(0,1fr) auto}
+  .rq-score{grid-column:1 / -1;grid-row:2;white-space:normal;font-size:10.5px}
+  .stats li > span:last-child{white-space:normal;font-size:10.5px;letter-spacing:.1em;max-width:14em}
+  .bleed .cap{text-align:left;font-size:10.5px}
+}
+/* the map band: tall enough for every dot (Gullfoss 12 % to Selfoss 77 % of the plate), the window
+   centred on that range instead of the plate's middle */
+.map--region{height:min(calc(100cqw * .565),92vh);min-height:420px}
+.map--region .map-canvas{top:47%;transform:translateY(-47%)}
+/* the villa page's spa pair: two equal squares, a true diptych like the houses chapter */
+.duo{grid-template-columns:[a] minmax(0,1fr) [b] minmax(0,1fr) [c d];column-gap:clamp(16px,3vw,56px);align-items:start}
+.duo-a,.duo-b{width:auto;padding:0;justify-self:stretch;margin:0}
+.duo--v2 .duo-a{width:auto;justify-self:stretch}
+.duo figure img{aspect-ratio:1 / 1;height:auto;object-fit:cover}
+@media (max-width:899px){ .duo{grid-template-columns:[a b c] minmax(0,1fr) [d]} .duo-a,.duo-b{grid-column:a / d;width:auto} }
+/* phone doors: a tighter text block (the whole door is the tap target, so the arrow cue goes), so the
+   lines end above the house's gable instead of across it */
+@media (max-width:719px){
+  .hero .door-num{font-size:30px;margin-bottom:6px}
+  .hero .door-name{font-size:clamp(20px,5.6vw,24px)}
+  .hero .door-spec{margin-top:10px;padding-top:8px}
+  .hero .door-cue{display:none}
+  .hero .door-foot{gap:0}
+}
+
+/* ================= V5b: after the Codex design audit (22 Oct, night) =================
+   Applied where it checked out against the code: equal gutters aligned to the door labels, the
+   footer's three columns on one row, the wordmark fitted to the page edge, the villa intro without
+   its phantom row, one numeral track for both houses, map labels and units, full salt for small type
+   on photographs, anchor landings clear of the fixed bar, the review stagger capped, the sheet on
+   salt. Kept against its advice: the proof icons (Sindri asked for them), the footer drift, the
+   stay cards, the ritual's staggered title, the "book direct" mechanic (the SNDR proposal). */
+:root{--padL:max(clamp(16px,3vw,44px),env(safe-area-inset-left));--padR:max(clamp(16px,3vw,44px),env(safe-area-inset-right))}
+.statement .statement-big{grid-column:a / d;font-family:var(--body);font-weight:500;font-size:clamp(26px,3vw,46px);line-height:1.16;letter-spacing:-.018em;max-width:28ch;text-transform:none;text-wrap:pretty}
+.statement .statement-sub{grid-column:a / c;font-size:17px;line-height:1.55;max-width:48ch;color:var(--salt-72);margin-top:-8px}
+.foot-cols > :first-child{grid-column:auto}
+.foot-cols p:not(.meta){font-size:15px}
+.foot-mark{width:100%;font-size:clamp(40px,8.95vw,172px)}
+.intro .ch-title{max-width:12em}
+.intro .ch-text{grid-row:2;grid-column:b / d;max-width:42em}
+.dip-text{grid-template-columns:clamp(48px,5.6vw,88px) minmax(0,1fr)}
+.map-km{font-style:normal}
+.place{min-height:44px;align-items:center}
+.places.has-sel .place:not(.is-on){opacity:.7}
+.wm-sub,.door-spec,.door-more,.door-cue{color:var(--salt)}
+.ch,.foot,#book-section{scroll-margin-top:80px}
+.rq-q .tw > span{transition-delay:min(calc(var(--i,0) * 28ms),240ms)}
+.rq.is-out .rq-q .tw > span{transition-delay:min(calc(var(--i,0) * 12ms),120ms)}
+dialog.bk{--ink:#F3F1EC}
+.bk-house button[aria-pressed="true"],.bk .btn{color:#F3F1EC}
+@media (max-width:899px){
+  .diptych{gap:64px}
+  .statement .statement-big,.statement .statement-sub{grid-column:a / d}
+  .ch,.foot,#book-section{scroll-margin-top:72px}
+  .foot-mark{font-size:clamp(40px,13.4vw,64px)}
+}
+@media (max-width:899px){ .stats b{white-space:normal} .map--region{height:auto;min-height:0} .map--region .map-canvas{top:0;transform:none} }
+
+/* ================= THEME: NATURE, LIGHT (Sindri 22 Oct late: "very dark look, i want to try a more
+   nature color theme and light colors") ================= switch: ?theme=nature (kept for the session),
+   ?theme=basalt back. Lichen-white ground, moss ink, one sage band, the map on a pale plate, the
+   footer on the daylight field. The doors, the openers and the next-door keep salt type on the
+   photographs under the same scrim. Same layout, same motion. */
+html[data-theme="nature"]{--basalt:#F2F4EF;--salt:#1E2D25;--salt-72:rgba(30,45,37,.68);--hair:rgba(30,45,37,.16);--ash:#DDE5D8;--veil:#1E2D25}
+html[data-theme="nature"] body{background:#F2F4EF;color:#1E2D25}
+html[data-theme="nature"] :is(.hero,.door--opener,.door--next){--salt:#F3F1EC;--salt-72:rgba(243,241,236,.72);--hair:rgba(243,241,236,.16)}
+html[data-theme="nature"] .bar:not(.is-solid){color:#F3F1EC}
+html[data-theme="nature"] .bar.is-solid{background:rgba(242,244,239,.92);color:#1E2D25}
+html[data-theme="nature"] .stats{background:#F2F4EF}
+html[data-theme="nature"] .stats .ico{border-color:rgba(30,45,37,.35)}
+html[data-theme="nature"] :is(.bleed-frame,.duo img,.dip-media){background:#E4EAE0}
+html[data-theme="nature"] :is(.ritual,.said,.stay){--basalt:#1E2D25;--salt:#1E2D25;--salt-72:rgba(30,45,37,.68);--hair:rgba(30,45,37,.18);--ink:#DDE5D8;background:#DDE5D8;color:#1E2D25}
+html[data-theme="nature"] .trip-media{background:#C9D5C8}
+/* the map on a pale plate */
+html[data-theme="nature"] :is(.map-canvas,.map--region){background:#E4EAE0}
+html[data-theme="nature"] .m-land{fill:#E4EAE0}
+html[data-theme="nature"] .m-water{fill:#C6D4CB}
+html[data-theme="nature"] .m-river{stroke:rgba(30,45,37,.22)}
+html[data-theme="nature"] .m-road{stroke:rgba(30,45,37,.13)}
+html[data-theme="nature"] .m-road--major{stroke:rgba(30,45,37,.4)}
+html[data-theme="nature"] .m-track{stroke:rgba(30,45,37,.3)}
+html[data-theme="nature"] .m-bld{fill:rgba(30,45,37,.16)}
+html[data-theme="nature"] :is(.map-pt b,.map-edge,.map-km){background:#E4EAE0}
+html[data-theme="nature"] .map.has-sel .map-pt:not(.is-on):not(.map-pt--home) b{color:rgba(30,45,37,.5)}
+/* the footer on the daylight field */
+html[data-theme="nature"] .foot{--salt:#1E2D25;--salt-72:rgba(30,45,37,.68);--hair:rgba(30,45,37,.2);background:#F2F4EF}
+html[data-theme="nature"] .foot::before{background:linear-gradient(to bottom,#F2F4EF 0%,rgba(242,244,239,.72) 30%,rgba(242,244,239,.45) 60%,rgba(242,244,239,.9) 100%)}
+.foot-day{display:none}
+html[data-theme="nature"] .foot-night{display:none}
+html[data-theme="nature"] .foot-day{display:block;opacity:.9;object-position:50% 60%}
+html[data-theme="nature"] .foot-sky img{opacity:.9}
+/* the sheet */
+html[data-theme="nature"] dialog.bk{--forest:#1E2D25;--secondary:rgba(30,45,37,.74);--line:rgba(30,45,37,.16);--mist:#DDE5D8;--bar:#1E2D25;--salt:#1E2D25;--salt-72:rgba(30,45,37,.62);--hair:rgba(30,45,37,.16);--ink:#F2F4EF;color:#1E2D25}
+html[data-theme="nature"] .bk-bar{background:#F2F4EF}
+html[data-theme="nature"] .bk-fields :is(input,textarea,select){background:#FAFBF8}
+html[data-theme="nature"] .bk-d.in{background:rgba(30,45,37,.1)}
+html[data-theme="nature"] .bk-d.pv{background:rgba(30,45,37,.06)}
+html[data-theme="nature"] :is(.bk-d.start,.bk-d.end,.bk .btn,.bk-house button[aria-pressed="true"]){color:#F2F4EF}
+
+/* ================= THEME: FJORD, COOL LIGHT (Sindri 22 Oct late: "very dark look, i want to try a more
+   nature color theme and light colors") ================= switch: ?theme=nature (kept for the session),
+   ?theme=basalt back. Lichen-white ground, moss ink, one sage band, the map on a pale plate, the
+   footer on the daylight field. The doors, the openers and the next-door keep salt type on the
+   photographs under the same scrim. Same layout, same motion. */
+html[data-theme="fjord"]{--basalt:#EEF2F3;--salt:#1B2A33;--salt-72:rgba(27,42,51,.68);--hair:rgba(27,42,51,.16);--ash:#D9E3E6;--veil:#1B2A33}
+html[data-theme="fjord"] body{background:#EEF2F3;color:#1B2A33}
+html[data-theme="fjord"] :is(.hero,.door--opener,.door--next){--salt:#F3F1EC;--salt-72:rgba(243,241,236,.72);--hair:rgba(243,241,236,.16)}
+html[data-theme="fjord"] .bar:not(.is-solid){color:#F3F1EC}
+html[data-theme="fjord"] .bar.is-solid{background:rgba(238,242,243,.92);color:#1B2A33}
+html[data-theme="fjord"] .stats{background:#EEF2F3}
+html[data-theme="fjord"] .stats .ico{border-color:rgba(27,42,51,.35)}
+html[data-theme="fjord"] :is(.bleed-frame,.duo img,.dip-media){background:#E2EAEC}
+html[data-theme="fjord"] :is(.ritual,.said,.stay){--basalt:#1B2A33;--salt:#1B2A33;--salt-72:rgba(27,42,51,.68);--hair:rgba(27,42,51,.18);--ink:#D9E3E6;background:#D9E3E6;color:#1B2A33}
+html[data-theme="fjord"] .trip-media{background:#C6D3D8}
+/* the map on a pale plate */
+html[data-theme="fjord"] :is(.map-canvas,.map--region){background:#E2EAEC}
+html[data-theme="fjord"] .m-land{fill:#E2EAEC}
+html[data-theme="fjord"] .m-water{fill:#C3D3D9}
+html[data-theme="fjord"] .m-river{stroke:rgba(27,42,51,.22)}
+html[data-theme="fjord"] .m-road{stroke:rgba(27,42,51,.13)}
+html[data-theme="fjord"] .m-road--major{stroke:rgba(27,42,51,.4)}
+html[data-theme="fjord"] .m-track{stroke:rgba(27,42,51,.3)}
+html[data-theme="fjord"] .m-bld{fill:rgba(27,42,51,.16)}
+html[data-theme="fjord"] :is(.map-pt b,.map-edge,.map-km){background:#E2EAEC}
+html[data-theme="fjord"] .map.has-sel .map-pt:not(.is-on):not(.map-pt--home) b{color:rgba(27,42,51,.5)}
+/* the footer on the daylight field */
+html[data-theme="fjord"] .foot{--salt:#1B2A33;--salt-72:rgba(27,42,51,.68);--hair:rgba(27,42,51,.2);background:#EEF2F3}
+html[data-theme="fjord"] .foot::before{background:linear-gradient(to bottom,#EEF2F3 0%,rgba(238,242,243,.72) 30%,rgba(238,242,243,.45) 60%,rgba(238,242,243,.9) 100%)}
+.foot-day{display:none}
+html[data-theme="fjord"] .foot-night{display:none}
+html[data-theme="fjord"] .foot-day{display:block;opacity:.9;object-position:50% 60%}
+html[data-theme="fjord"] .foot-sky img{opacity:.9}
+/* the sheet */
+html[data-theme="fjord"] dialog.bk{--forest:#1B2A33;--secondary:rgba(27,42,51,.74);--line:rgba(27,42,51,.16);--mist:#D9E3E6;--bar:#1B2A33;--salt:#1B2A33;--salt-72:rgba(27,42,51,.62);--hair:rgba(27,42,51,.16);--ink:#EEF2F3;color:#1B2A33}
+html[data-theme="fjord"] .bk-bar{background:#EEF2F3}
+html[data-theme="fjord"] .bk-fields :is(input,textarea,select){background:#F8FAFB}
+html[data-theme="fjord"] .bk-d.in{background:rgba(27,42,51,.1)}
+html[data-theme="fjord"] .bk-d.pv{background:rgba(27,42,51,.06)}
+html[data-theme="fjord"] :is(.bk-d.start,.bk-d.end,.bk .btn,.bk-house button[aria-pressed="true"]){color:#EEF2F3}
+
+
+/* ================= THEME: FOREST, DEEP GREEN (dark, nature) ================= ?theme=forest */
+html[data-theme="forest"]{--basalt:#1B2922;--salt:#EEF0E8;--salt-72:rgba(238,240,232,.72);--hair:rgba(238,240,232,.16);--ash:#DDE5D8;--veil:#1B2922}
+html[data-theme="forest"] body{background:#1B2922}
+html[data-theme="forest"] .bar.is-solid{background:rgba(27,41,34,.92)}
+html[data-theme="forest"] :is(.bleed-frame,.duo img,.dip-media){background:#223229}
+html[data-theme="forest"] :is(.ritual,.said,.stay,.kick--ash){--basalt:#1B2922;--salt:#1B2922;--salt-72:rgba(27,41,34,.68);--hair:rgba(27,41,34,.18);--ink:#DDE5D8;background:#DDE5D8;color:#1B2922}
+html[data-theme="forest"] :is(.map-canvas,.map--region){background:#243329}
+html[data-theme="forest"] .m-land{fill:#243329}
+html[data-theme="forest"] .m-water{fill:#1A2622}
+html[data-theme="forest"] :is(.map-pt b,.map-edge,.map-km){background:#243329}
+html[data-theme="forest"] .foot{background:#1B2922}
+html[data-theme="forest"] .foot::before{background:linear-gradient(to bottom,#1B2922 0%,rgba(27,41,34,.55) 28%,rgba(27,41,34,.35) 60%,rgba(27,41,34,.82) 100%)}
+html[data-theme="forest"] dialog.bk{--forest:#1B2922;--secondary:rgba(27,41,34,.74);--line:rgba(27,41,34,.16);--mist:#DDE5D8;--bar:#1B2922;--salt:#1B2922;--salt-72:rgba(27,41,34,.62);--hair:rgba(27,41,34,.16);--ink:#F2F4EF;color:#1B2922}
+html[data-theme="forest"] .bk-bar{background:#F2F4EF}
+html[data-theme="forest"] :is(.bk-d.start,.bk-d.end,.bk .btn,.bk-house button[aria-pressed="true"]){color:#F2F4EF}
+
+/* ================= V6 (22 Oct, late night): the ledger, the review stream, the villa chapters =================
+   Sindri: the proof band "looks poor and generic"; villa pages need "user friendly layouts and section
+   breaks, maps that really work with a tab to open in google maps, reviews on each page that flow
+   automatically in a premium way"; the home word-flip "doesn't look so good". */
+/* the ledger: three outlined numerals in the site's own voice, under the statement */
+.ledger{grid-column:a / d;margin:clamp(40px,5vw,72px) 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px clamp(24px,3vw,48px);padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--hair)}
+.ledger > div{min-width:0}
+.ledger dd{margin:0}
+.ledger b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(44px,7.6vw,136px);line-height:.9;letter-spacing:-.01em;color:transparent;-webkit-text-stroke:max(1.5px,.013em) var(--salt);text-stroke:max(1.5px,.013em) var(--salt);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ledger b span{font:inherit;color:inherit;-webkit-text-stroke:inherit}
+.ledger .meta{display:block;margin-top:16px;color:var(--salt-72);max-width:22em}
+@media (max-width:899px){
+  .ledger{grid-template-columns:1fr;gap:0;margin-top:40px;padding-top:0;border-top:0}
+  .ledger > div{border-top:1px solid var(--hair);padding:16px 0}
+  .ledger dd{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);align-items:baseline;gap:18px}
+  .ledger b{font-size:44px}
+  .ledger .meta{margin:0}
+}
+/* the review stream */
+.said > .ch-title{grid-column:a / c;grid-row:1;max-width:8em;padding-right:4cqw}
+.said > .ch-lede{grid-column:c / d;grid-row:1;align-self:end;max-width:18em;font-size:clamp(18px,1.4vw,21px);line-height:1.45;color:var(--salt-72);padding-bottom:.35em}
+.stream{grid-column:a / d;grid-row:2;margin:clamp(28px,4vw,56px) calc(var(--padR) * -1) 0 calc(var(--padL) * -1);overflow:hidden;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent)}
+.stream-track{display:flex;width:max-content;animation:stream var(--stream-d,80s) linear infinite;animation-play-state:paused}
+.stream.is-flowing .stream-track{animation-play-state:running}
+.stream.is-paused .stream-track{animation-play-state:paused}
+@keyframes stream{to{transform:translateX(-50%)}}
+.rev{flex:0 0 clamp(300px,27vw,440px);margin:0;padding:6px clamp(24px,2.4vw,40px) 10px;border-left:1px solid var(--hair);display:grid;gap:18px;align-content:start}
+.rev blockquote{margin:0}
+.rev p{font-size:clamp(17px,1.3vw,19px);line-height:1.45;text-wrap:pretty;margin:0}
+.rev figcaption{color:var(--salt-72);display:flex;flex-wrap:wrap;gap:4px 0}
+.rev-stars{display:flex;gap:3px;color:var(--salt)}
+.rev-stars .ico{display:block;width:12px;height:12px}
+.rev-stars .ico svg{display:block;width:12px;height:12px}
+@media (max-width:899px){
+  .said > .ch-title,.said > .ch-lede{grid-column:a / d;grid-row:auto;align-self:start;padding:0;max-width:none}
+  .stream{grid-row:auto}
+  .rev{flex-basis:min(78vw,320px);padding:4px 20px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .stream{overflow-x:auto;-webkit-mask-image:none;mask-image:none;scroll-snap-type:x proximity;padding-bottom:12px}
+  .stream-track{animation:none}
+  .rev{scroll-snap-align:start}
+  .rev[aria-hidden="true"]{display:none}
+}
+/* the villa chapters: section breaks */
+.kick{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin:clamp(88px,10vw,160px) var(--padR) 0 var(--padL);padding-top:18px;border-top:1px solid var(--hair);color:var(--salt-72)}
+.kick b{font-weight:400;color:var(--salt);margin-right:16px;font-variant-numeric:tabular-nums}
+.kick + .ch{padding-top:clamp(36px,4vw,60px)}
+.kick + .bleed{margin-top:clamp(36px,4vw,60px)}
+.kick--ash{--salt:#121211;--salt-72:rgba(18,18,17,.68);--hair:rgba(18,18,17,.18);background:var(--ash);margin:0;padding:clamp(88px,10vw,160px) var(--padR) 0 var(--padL);border-top:0}
+.kick--ash::before{content:'';display:block;flex:0 0 100%;height:1px;background:var(--hair);margin-bottom:18px}
+.kick--ash span{display:inline-block}
+.kick + .said,.kick + .stay{padding-top:clamp(36px,4vw,60px)}
+.said + .kick--ash{padding-top:clamp(72px,8vw,120px)}
+html[data-theme="nature"] .kick--ash{--salt:#1E2D25;--salt-72:rgba(30,45,37,.68);--hair:rgba(30,45,37,.18);background:#DDE5D8}
+/* where it is: the tab row over the plate */
+.where .ch-lede{max-width:22em}
+.map-tabs{grid-column:a / d;grid-row:2;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 clamp(20px,2.6vw,40px);margin-top:clamp(20px,2.6vw,36px);border-bottom:1px solid var(--hair)}
+.map-tab{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--salt-72);text-decoration:none;padding:10px 0 12px;margin-bottom:-1px;border-bottom:1px solid transparent;min-height:44px;display:inline-flex;align-items:center;gap:8px;transition:color .2s linear,border-color .2s linear}
+.map-tab.is-on{color:var(--salt);border-bottom-color:var(--salt)}
+a.map-tab::after{content:'\2197';font-family:var(--body);font-size:14px}
+a.map-tab:focus-visible{outline:2px solid var(--salt);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){ a.map-tab:hover{color:var(--salt);border-bottom-color:var(--salt-72)} }
+.map-tab--ll{margin-left:auto;color:var(--salt-72);letter-spacing:.1em}
+.where .around-maps{grid-row:3;margin-top:0}
+.where .places{grid-row:4}
+.where .places-note{grid-row:5}
+.places--short{grid-template-columns:1fr}
+.places--short ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 clamp(24px,3vw,48px)}
+@media (max-width:899px){ .places--short ul{grid-template-columns:1fr 1fr} .map-tab--ll{display:none} .map-tabs{gap:0 20px} }
+.door--next{margin-top:0}
+.around.where{padding-bottom:clamp(48px,5vw,80px)}
+.rev-stars .ico svg{width:11px;height:11px}
+/* the door feet mirror each other: each block is exactly as wide as its widest line, so the
+   hairline spans the same lines on both doors (Sindri: "non symmetrical, not mirrored") */
+.hero .door-foot,.door--next .door-foot,.door--opener .door-foot{width:max-content;max-width:min(560px,62vw);justify-items:stretch}
+.hero .door[data-house="v2"] .door-foot,.door--next.door[data-house="v2"] .door-foot,.door--opener[data-house="v2"] .door-foot{justify-items:stretch;text-align:right}
+.door[data-house="v2"] .door-cue{justify-self:end}
+@media (max-width:719px){ .hero .door-foot,.door--opener .door-foot,.door--next .door-foot{width:auto;max-width:none} }
+/* the footer photo at full strength (Sindri: "fix the footer image/faded theme overlay"): the scrim
+   only holds the top hinge and the band where the type sits; the aurora stays an aurora */
+.foot-sky img{opacity:1;object-position:50% 35%}
+.foot::before{background:linear-gradient(to bottom,rgba(18,18,17,.92) 0%,rgba(18,18,17,.52) 22%,rgba(18,18,17,.18) 48%,rgba(18,18,17,.1) 66%,rgba(18,18,17,.66) 100%)}
+.foot-in{text-shadow:0 1px 18px rgba(18,18,17,.35)}
+.foot-mark{text-shadow:none}
+/* the ledger, re-set (Sindri: "almost getting there, needs to be better, some minimalistic icon"):
+   three ruled columns, a thin Phosphor icon above each numeral, one short mono line under it */
+.ledger{border-top:0;padding-top:0;gap:0;margin-top:clamp(48px,6vw,88px)}
+.ledger > div{border-left:1px solid var(--hair);padding:4px 0 6px clamp(20px,2.4vw,36px)}
+.ledger > div:first-child{border-left:0;padding-left:0}
+.ledger-ico{display:block;width:20px;height:20px;margin-bottom:clamp(18px,2vw,28px);color:var(--salt-72)}
+.ledger-ico .ico{display:block;width:20px;height:20px}
+.ledger-ico .ico svg{display:block;width:20px;height:20px}
+.ledger b{font-size:clamp(40px,6.6vw,118px)}
+.ledger .meta{margin-top:14px;white-space:nowrap}
+@media (max-width:899px){
+  .ledger{margin-top:40px}
+  .ledger > div{border-left:0;border-top:1px solid var(--hair);padding:16px 0}
+  .ledger dd{grid-template-columns:20px minmax(0,auto) minmax(0,1fr);align-items:center;gap:16px}
+  .ledger-ico{margin:0}
+  .ledger b{font-size:40px}
+  .ledger .meta{white-space:normal}
+}
+
+/* ================= THE LAST WORD: a solid signature footer (Sindri: "skip having the image under") =================
+   No photograph: the page ends on a block of ink, the coordinates, one sentence, one button, the two
+   numerals, three columns, and the wordmark cut by the bottom edge. Everything arrives in beats. */
+.foot{min-height:0;background:var(--foot-bg,#0E0E0D);border-top:1px solid var(--hair)}
+.foot::before{content:none}
+.foot-in{text-shadow:none;padding-top:clamp(88px,10vw,150px)}
+html[data-theme="fjord"] .foot{background:#1B2A33;--foot-bg:#1B2A33;--salt:#EEF2F3;--salt-72:rgba(238,242,243,.72);--hair:rgba(238,242,243,.16);--basalt:#1B2A33;border-top:0}
+html[data-theme="nature"] .foot{background:#1E2D25;--foot-bg:#1E2D25;--salt:#F2F4EF;--salt-72:rgba(242,244,239,.72);--hair:rgba(242,244,239,.16);--basalt:#1E2D25;border-top:0}
+html[data-theme="forest"] .foot{background:#132019;--foot-bg:#132019;--salt:#EEF0E8;--salt-72:rgba(238,240,232,.72);--hair:rgba(238,240,232,.16);--basalt:#132019}
+html[data-theme] .foot::before{content:none}
+/* beats */
+.foot-in > .rv:nth-child(2){transition-delay:.08s}
+.foot-in > .rv:nth-child(3){transition-delay:.16s}
+.foot-in > .rv:nth-child(4){transition-delay:.12s}
+.foot-in > .rv:nth-child(5){transition-delay:.24s}
+.foot-in > .rv:nth-child(6){transition-delay:.3s}
+html.js .foot-mark.rv{opacity:1;transform:translateY(100%);transition:transform 1.3s var(--e-out) .1s}
+html.js .foot-mark.rv.is-in{transform:translateY(.22em)}
+@media (max-width:899px){ html.js .foot-mark.rv.is-in{transform:translateY(.16em)} }
+/* the fjord default: the page ground and the bar */
+html[data-theme="fjord"] .bar:not(.is-solid){color:#F3F1EC}
+
+/* ================= SCROLL MOTION, the missing layer (Sindri: "missing text reveal and everything on scroll") ================= */
+/* the statement sentence rises through its own mask */
+html.js .statement-big.rv{opacity:1;transform:none;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+html.js .statement-big.rv > span{display:block;transform:translateY(112%);transition:transform 1.15s var(--e-out) .05s}
+html.js .statement-big.rv.is-in > span{transform:none}
+/* the ledger numerals wipe up, a beat apart; the icons and labels follow */
+html.js .ledger.rv{opacity:1;transform:none}
+html.js .ledger.rv b{clip-path:inset(0 -4% 100% -4%);transition:clip-path 1s var(--e-out)}
+html.js .ledger.rv.is-in b{clip-path:inset(-4% -4% -12% -4%)}
+html.js .ledger.rv :is(.ledger-ico,.meta){opacity:0;transform:translateY(10px);transition:opacity .6s ease .3s,transform .7s var(--e-out) .3s}
+html.js .ledger.rv.is-in :is(.ledger-ico,.meta){opacity:1;transform:none}
+html.js .ledger.rv > div:nth-child(2) *{transition-delay:.12s}
+html.js .ledger.rv > div:nth-child(2) :is(.ledger-ico,.meta){transition-delay:.42s}
+html.js .ledger.rv > div:nth-child(3) *{transition-delay:.24s}
+html.js .ledger.rv > div:nth-child(3) :is(.ledger-ico,.meta){transition-delay:.54s}
+/* the kicker hairline draws across, then its words */
+.kick{position:relative;border-top:0;padding-top:19px}
+.kick::after{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:var(--hair);transform:scaleX(0);transform-origin:left;transition:transform 1.2s var(--e-out)}
+.kick--ash::after{top:auto;bottom:calc(100% - 1px);display:none}
+.kick--ash::before{transform:scaleX(0);transform-origin:left;transition:transform 1.2s var(--e-out)}
+html.js .kick.rv{opacity:1;transform:none}
+html.js .kick.rv > span{opacity:0;transform:translateY(8px);transition:opacity .5s ease .5s,transform .6s var(--e-out) .5s}
+html.js .kick.rv.is-in > span{opacity:1;transform:none}
+html.js .kick.rv.is-in::after,html.js .kick--ash.rv.is-in::before{transform:none}
+/* photo windows: the frame keeps its size while GSAP drifts the picture inside (app.js) */
+.dip-media img,.trip-media img{will-change:transform;height:112%;margin-top:-6%}
+@media (prefers-reduced-motion:reduce){
+  html.js .statement-big.rv > span,html.js .ledger.rv b,.kick::after,.kick--ash::before,html.js .foot-mark.rv{transition:none;transform:none;clip-path:none}
+  .dip-media img,.trip-media img{height:100%;margin-top:0}
+}
+/* the wordmark rises from the bottom edge once the footer's last row is in (it sits in the band the
+   reveal observer ignores, so it follows the row above it) */
+html.js .foot-mark{transform:translateY(100%);transition:transform 1.3s var(--e-out) .15s}
+html.js .foot:has(.foot-base.is-in) .foot-mark{transform:translateY(.22em)}
+@media (max-width:899px){ html.js .foot:has(.foot-base.is-in) .foot-mark{transform:translateY(.16em)} }
+@supports not selector(:has(a)){ html.js .foot-mark{transform:translateY(.22em)} }
+@media (prefers-reduced-motion:reduce){ html.js .foot-mark{transition:none;transform:translateY(.22em)} }
+
+/* ===================== iOS PASS (23 Oct 2026; Sindri: "an extreme iOS pass, perfected on iOS and mobile") =====================
+   Found on the iPhone simulator (iOS 26.5 Safari), each with its cause. */
+
+/* focus-guard (studio rule): no ring after a tap, every ring for the keyboard */
+html[data-input="pointer"] :focus-visible:not(input):not(textarea):not(select):not([contenteditable="true"]){outline:none}
+[tabindex="-1"]:focus{outline:none}
+
+/* iOS draws its own button (grey rounded glass, system-blue glyphs: the guest stepper, the month
+   arrows, the in-range day) unless told not to; and a CSS display beat the [hidden] attribute, so the
+   sheet's dates step never hid behind the details step and its "sent" panel always showed. */
+[hidden]{display:none !important}
+button{color:inherit;font:inherit}
+a,button{-webkit-tap-highlight-color:transparent}
+.bk button{-webkit-appearance:none;appearance:none;border-radius:0;background-color:transparent}
+
+/* Safari 26 tints the status bar from an opaque fixed header and the toolbar from <body>: the solid
+   bar is opaque (a translucent one gave a grey band), the page ground moves to <main>, and <body>
+   turns dark while the first-screen photographs or the footer are in view (app.js, SAFARI TINT). */
+.bar.is-solid{background:#121211;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 1px 0 rgba(243,241,236,.1)}
+html[data-theme="fjord"] .bar.is-solid{background:#EEF2F3;box-shadow:0 1px 0 rgba(27,42,51,.1)}
+html[data-theme="nature"] .bar.is-solid{background:#F2F4EF;box-shadow:0 1px 0 rgba(30,45,37,.1)}
+html[data-theme="forest"] .bar.is-solid{background:#1B2922}
+html[data-theme="fjord"] .bar.is-solid .bar-cta{border-color:rgba(27,42,51,.4);background:transparent}
+html[data-theme="nature"] .bar.is-solid .bar-cta{border-color:rgba(30,45,37,.4);background:transparent}
+.bar-cta{border-radius:0}
+main{background:var(--basalt)}
+html.tint-dark body{background:#0E0E0D}
+html[data-theme="fjord"].tint-dark body{background:#1B2A33}
+html[data-theme="nature"].tint-dark body{background:#1E2D25}
+html[data-theme="forest"].tint-dark body{background:#132019}
+
+/* a line of facts breaks between facts only (build: nw()) */
+.nw{white-space:nowrap}
+
+/* review cards: who, where, which house, one per line */
+.rev figcaption{display:grid;gap:5px}
+.rev figcaption .rev-who{color:var(--salt)}
+
+/* the sheet's house chooser keeps the long names from 720px, three equal cells on a phone */
+.bk-house em{font-style:normal}
+.bk-hs{display:none}
+
+/* places: the tab row exists for phones only */
+.places-tabs{display:none}
+
+@media (max-width:899px){
+  /* the destinations: one group at a time in a two-column grid under the map (Sindri: "use the
+     space better instead of being so long with every destination") */
+  html.js .around .places-tabs{display:flex;grid-column:1 / -1;border-bottom:1px solid var(--hair);overflow-x:auto;scrollbar-width:none;
+    margin:0 calc(var(--padR) * -1) 4px calc(var(--padL) * -1);padding:0 var(--padR) 0 var(--padL)}
+  .places-tabs::-webkit-scrollbar{display:none}
+  html.js .around .places-tabs{justify-content:space-between;gap:12px}
+  .places-tabs button{appearance:none;-webkit-appearance:none;background:none;border:0;border-radius:0;flex:none;position:relative;min-height:46px;padding:0;
+    font:500 10.5px/1 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--salt-72);white-space:nowrap;cursor:pointer;transition:color .2s linear}
+  .places-tabs button[aria-pressed="true"]{color:var(--salt)}
+  .places-tabs button::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--e-out)}
+  .places-tabs button[aria-pressed="true"]::after{transform:none}
+  .places-tabs button:focus-visible{outline:2px solid var(--salt);outline-offset:2px}
+  .around .places{grid-template-columns:minmax(0,1fr);gap:0}
+  html.js .places:has(> .places-tabs) > .places-group{display:none;border-top:0;padding-top:0}
+  html.js .places:has(> .places-tabs) > .places-group.is-shown{display:block}
+  html.js .places:has(> .places-tabs) > .places-group h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .places ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px}
+  .places .place{flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;min-height:68px;padding:12px 0;border-bottom:1px solid var(--hair)}
+  .places .place span:first-child{font-size:16px;line-height:1.25}
+  .places .place span:last-child{font-size:12px}
+  .places-group:not(.is-shown) li:last-child:nth-child(odd) .place{border-bottom-color:var(--hair)}
+}
+
+@media (max-width:719px){
+  /* the numerals: an outlined Roman I at phone size read as a missing-glyph box. Filled, with the
+     classic bars above and below, they read as I and II at a glance. */
+  .door-num,.dip-num,.foot-door-num,.stay-card-num{color:inherit !important;-webkit-text-stroke:0 !important;text-stroke:0 !important;
+    display:inline-block;width:max-content;justify-self:start;align-self:start;line-height:1;padding:.11em .15em .1em;
+    box-shadow:inset 0 .075em 0 currentColor,inset 0 -.075em 0 currentColor}
+  .hero .door-num{font-size:26px;margin-bottom:10px}
+  .door[data-house="v2"] .door-num{justify-self:end}
+  .dip-text{grid-template-columns:minmax(0,1fr);gap:10px}
+  .dip-num{font-size:36px;grid-row:auto;margin-bottom:6px}
+  .foot-door-num{font-size:56px;margin-bottom:14px}
+  /* stay cards: the numeral above the name, so every name starts on the same line */
+  .stay-card{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;justify-items:start;row-gap:10px;padding:22px}
+  .stay-card-num{grid-row:auto;font-size:28px;margin:0 0 6px}
+  /* the ritual: three frames in one swipe row, the next one showing at the edge */
+  .trip{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;
+    margin-left:calc(var(--padL) * -1);margin-right:calc(var(--padR) * -1);padding:0 var(--padR) 6px var(--padL);scroll-padding-inline:var(--padL)}
+  .trip::-webkit-scrollbar{display:none}
+  .trip-f{flex:0 0 80%;scroll-snap-align:start}
+  /* the chooser in the sheet: three equal cells, short names */
+  .bk-house{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .bk-house button{flex-direction:column;justify-content:center;gap:7px;min-height:66px;padding:10px 4px;font-size:13px}
+  .bk-hl{display:none}
+  .bk-hs{display:inline}
+  /* small type: the seam line was 9.5px */
+  .wm-sub{font-size:10.5px;letter-spacing:.16em}
+}
+
+/* the house pin on the map speaks the bar's language, not the retired grotesk */
+.map-pt--home b{font-family:var(--gothic);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase}
+@media (max-width:719px){ .map-pt--home b{font-size:12px} }
+/* the sheet: a night booked on Airbnb or VRBO is struck through, so it reads differently from a past day */
+.bk-d.bk-taken{text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:currentColor}
+.bk-d.bk-taken.today{text-decoration:line-through underline}
+/* the action bar takes the sheet's own ground instead of white */
+html[data-theme="fjord"] .bk-end{background:#EEF2F3}
+html[data-theme="nature"] .bk-end{background:#F2F4EF}
+/* after an arrival: the first booked night is a departure (the next guests arrive that afternoon),
+   the open nights beyond it start a new stay */
+.bk-d.beyond{color:var(--secondary)}
+.bk-d.bk-taken.bk-out{color:inherit;text-decoration-color:var(--secondary)}
+/* the sheet: once the dates are chosen, the house is decided; the details step gets the room */
+.bk[data-step="who"] .bk-house,.bk[data-step="done"] .bk-house{display:none}
+.bk[data-step="done"] .bk-end{display:none}
+.bk-done h3{font-family:var(--gothic);font-weight:700;text-transform:uppercase;letter-spacing:-.01em;font-size:clamp(30px,4vw,44px);line-height:1}
+/* landscape phones run the desktop layout: same legible numerals, a tighter sheet */
+@media (max-height:500px) and (orientation:landscape){
+  .door-num,.dip-num,.foot-door-num,.stay-card-num{color:inherit !important;-webkit-text-stroke:0 !important;text-stroke:0 !important;
+    display:inline-block;width:max-content;justify-self:start;line-height:1;padding:.11em .15em .1em;box-shadow:inset 0 .075em 0 currentColor,inset 0 -.075em 0 currentColor}
+  .door[data-house="v2"] .door-num{justify-self:end}
+  .bk-top{padding-top:12px;padding-bottom:2px}
+  .bk-h{font-size:22px}
+  .bk-sub{display:none}
+  .bk-body{gap:12px}
+  .bk-house{padding:0 0 6px}
+}
+
+/* ===== Codex audit, 23 Oct (codex-ios-audit/REPORT.md), applied after checking each against the source ===== */
+/* the light solid bar: the Book button keeps a readable hover */
+@media (hover:hover) and (pointer:fine){
+  html[data-theme="fjord"] .bar.is-solid .bar-cta:hover{background:#1B2A33;color:#EEF2F3;border-color:#1B2A33}
+  html[data-theme="nature"] .bar.is-solid .bar-cta:hover{background:#1E2D25;color:#F2F4EF;border-color:#1E2D25}
+}
+/* while the sheet is open it owns Safari's tint, at every width */
+html.bk-open,html.bk-open body{background:#fff}
+html[data-theme="fjord"].bk-open,html[data-theme="fjord"].bk-open body,html[data-theme="fjord"]:has(dialog.bk[open]){background:#EEF2F3}
+html[data-theme="nature"].bk-open,html[data-theme="nature"].bk-open body,html[data-theme="nature"]:has(dialog.bk[open]){background:#F2F4EF}
+html[data-theme="forest"].bk-open,html[data-theme="forest"].bk-open body,html[data-theme="forest"]:has(dialog.bk[open]){background:#F2F4EF}
+html[data-theme="forest"] .bk-end{background:#F2F4EF}
+/* the reviews' own Pause / Play */
+.stream-ctl{grid-column:a / d;grid-row:3;justify-self:end;margin-top:14px;min-height:44px;padding:0 2px;background:none;border:0;border-radius:0;
+  color:var(--salt-72);cursor:pointer;display:inline-flex;align-items:center;gap:10px;transition:color .2s linear}
+.stream-ctl::before{content:'';width:8px;height:10px;border-left:2px solid currentColor;border-right:2px solid currentColor}
+.stream-ctl[aria-pressed="true"]::before{width:0;height:0;border:0;border-left:9px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent}
+@media (hover:hover) and (pointer:fine){ .stream-ctl:hover{color:var(--salt)} }
+.stream-ctl:focus-visible,.trip:focus-visible{outline:2px solid var(--salt);outline-offset:4px}
+/* tablets too: the small house marks read as I and II, not as empty boxes */
+@media (min-width:720px) and (max-width:1023px){
+  .door-num,.stay-card-num{color:inherit !important;-webkit-text-stroke:0 !important;text-stroke:0 !important;display:inline-block;width:max-content;justify-self:start;
+    line-height:1;padding:.11em .15em .1em;box-shadow:inset 0 .075em 0 currentColor,inset 0 -.075em 0 currentColor}
+  .door[data-house="v2"] .door-num{justify-self:end}
+}
+@media (max-width:719px){
+  .stream-ctl{grid-row:auto;justify-self:start;margin-top:4px}
+  /* practical facts read at 12px on a phone; the seam line stays the one small decoration */
+  .dip-spec,.stay-card .meta,.bleed .cap,.duo .cap,.rev figcaption,.places-note{font-size:12px;line-height:1.5}
+  /* 320px: the place filter scrolls; say so with a soft edge */
+  html.js .around .places-tabs{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+}
+@media (min-width:380px){ html.js .around .places-tabs{-webkit-mask-image:none;mask-image:none} }
+@media (max-width:719px){ .said .stream-ctl + .stream{margin-top:10px} }

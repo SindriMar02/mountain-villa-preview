@@ -12,6 +12,7 @@
     const vt = e.viewTransition;
     if (vt) ['ready', 'finished', 'updateCallbackDone'].forEach((k) => vt[k] && vt[k].catch(() => {}));
   };
+  window.addEventListener('unhandledrejection', (e) => { if (e.reason && e.reason.name === 'AbortError') e.preventDefault(); });
   window.addEventListener('pageswap', quiet);
   window.addEventListener('pagereveal', quiet);
   const hero = document.querySelector('.hero');
@@ -49,15 +50,13 @@
     const leave = (trigger) => ({ trigger, start: 'top top', end: 'bottom top', scrub: SCRUB, invalidateOnRefresh: true });
 
     if (hero && doors) {
-      G.to(doors, { yPercent: 28, ease: 'none', scrollTrigger: leave(hero) });
-      doors.querySelectorAll('.door-top').forEach((el) => {
-        G.to(el, { y: () => -vh() * 0.12, ease: 'none', scrollTrigger: leave(hero) });
-      });
+      // As the hero leaves: the wordmark lifts and fades (Aurora Hills), the photographs drift.
+      const mark = hero.querySelector('.hero-mark');
+      if (mark) G.to(mark, { y: -110, opacity: 0.06, ease: 'none', scrollTrigger: leave(hero) });
     }
     const opener = document.querySelector('.door--opener');
     if (opener) {
       G.to(opener.querySelector('.door-media'), { yPercent: 22, ease: 'none', scrollTrigger: leave(opener) });
-      G.to(opener.querySelector('.door-top'), { y: () => -vh() * 0.12, ease: 'none', scrollTrigger: leave(opener) });
     }
     document.querySelectorAll('.bleed-frame').forEach((frame) => {
       G.fromTo(frame.querySelector('img'), { scale: 1.12 }, {
@@ -70,6 +69,12 @@
         y: () => -vh() * 0.06, ease: 'none',
         scrollTrigger: { trigger: fig.parentElement, start: 'top bottom', end: 'bottom top', scrub: SCRUB, invalidateOnRefresh: true },
       });
+    });
+    // Photo windows (the diptych, the ritual frames): the picture drifts inside its stationary frame.
+    document.querySelectorAll('.dip-media, .trip-media').forEach((win) => {
+      const im = win.querySelector('img'); if (!im) return;
+      G.fromTo(im, { yPercent: -5 }, { yPercent: 5, ease: 'none',
+        scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: SCRUB, invalidateOnRefresh: true } });
     });
     const next = document.querySelector('.door--next');
     if (next) {
@@ -101,55 +106,37 @@
           const h = target && (target.matches('[tabindex="-1"]') ? target : target.querySelector('[tabindex="-1"]'));
           if (h) h.focus({ preventScroll: true });
         };
-        lenis.scrollTo(target || 0, { immediate: kb, duration: 1.3, onComplete: land });
+        lenis.scrollTo(target || 0, { immediate: kb, duration: 1.3, offset: -80, onComplete: land });
         if (kb) land();
       });
     });
   }
 
   /* ---------- INTRO (home only) ----------
-     The curtain parts once both door photographs are decoded, but never later
-     than 2.2s and never sooner than the seam has had time to draw. */
+     Cold load, once per session (the boot script in <head> sets html.no-slate
+     on repeat visits, reduced motion and ?nointro). Two veils cover the
+     photographs; they part once both door photographs have decoded and the
+     fonts are ready, never sooner than 450 ms and never later than 1 400 ms.
+     The veils are removed from the DOM afterwards (a parked full-screen layer
+     tints iOS Safari's toolbar). */
   const ready = () => {
     if (!hero || hero.classList.contains('is-ready')) return;
     hero.classList.add('is-ready');
-    const curtain = hero.querySelector('.curtain');
-    // Removed from the DOM afterwards: a parked full-screen layer is what tints
-    // iOS Safari's toolbar long after it is invisible.
-    if (curtain) setTimeout(() => curtain.remove(), 1600);
+    const veil = hero.querySelector('.veil');
+    if (veil) setTimeout(() => veil.remove(), 1400);
   };
-  /* The loading slate (first visit of a session): it lifts after the mark has
-     risen and the hairline has filled (1.6 s), or when both door photographs
-     are decoded if that is later, but never later than 2.6 s. The doors start
-     their own entrance under the lift. Removed from the DOM after: a parked
-     full-screen layer tints iOS Safari's toolbar. */
-  const slate = document.querySelector('.slate');
-  const slateOn = slate && !document.documentElement.classList.contains('no-slate') && getComputedStyle(slate).display !== 'none';
-  if (slate && !slateOn) slate.remove();
-  if (hero && slateOn) {
+  const intro = hero && !document.documentElement.classList.contains('no-slate');
+  if (hero && (!intro || reduce.matches)) {
+    ready();
+  } else if (hero) {
     try { sessionStorage.setItem('mv-intro', '1'); } catch (_) { /* no storage: it plays each visit */ }
     const imgs = [...hero.querySelectorAll('.door-media img')];
     const decoded = Promise.all(imgs.map((img) => img.decode().catch(() => {})));
+    const fonts = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(() => {}) : Promise.resolve();
     Promise.race([
-      Promise.all([decoded, new Promise((r) => setTimeout(r, 1600))]),
-      new Promise((r) => setTimeout(r, 2600)),
-    ]).then(() => {
-      slate.classList.add('is-lifting');
-      setTimeout(ready, 120);
-      setTimeout(() => slate.remove(), 900);
-    });
-  } else if (hero) {
-    if (reduce.matches) {
-      ready();
-    } else {
-      const imgs = [...hero.querySelectorAll('.door-media img')];
-      const decoded = Promise.all(imgs.map((img) => img.decode().catch(() => {})));
-      const minWait = new Promise((r) => setTimeout(r, 650));
-      Promise.race([
-        Promise.all([decoded, minWait]),
-        new Promise((r) => setTimeout(r, 2200)),
-      ]).then(ready);
-    }
+      Promise.all([decoded, fonts, new Promise((r) => setTimeout(r, 450))]),
+      new Promise((r) => setTimeout(r, 1400)),
+    ]).then(ready);
   }
 
   /* ---------- OPEN (home only) ----------
@@ -179,17 +166,17 @@
       if (lenis) lenis.stop();   // no scrolling while the door opens
       door.classList.add('is-opened');
       doors.classList.add('is-opening');
-
       let done = false;
       const go = () => {
         if (done) return;
         done = true;
         door.removeEventListener('transitionend', onEnd);
+        try { sessionStorage.setItem('mv-arrive', '1'); } catch (_) { /* no storage */ }
         location.assign(door.href);
       };
       const onEnd = (ev) => { if (ev.target === door && ev.propertyName === 'flex-grow') go(); };
       door.addEventListener('transitionend', onEnd);
-      setTimeout(go, 1000);   // safety net if transitionend never fires
+      setTimeout(go, 1000);   // safety net
     });
 
     // Back from a building's page restores this one from the back/forward
@@ -200,8 +187,244 @@
       reset();
       if (lenis) lenis.start();
       if (ST) ST.refresh();
-      if (lastDoor) lastDoor.focus({ preventScroll: true });
+      // No focus restore: WebKit then paints the door in its :focus-visible (expanded) state after
+      // a pointer-opened Back (Codex iOS audit 22 Oct 19:40). Keyboard opens never animate, so
+      // the browser's own focus restoration covers them.
     });
+  }
+
+  /* ---------- PROOF BAND: the values count up once, as the band reveals ---------- */
+  const stats = document.querySelector('.ledger');
+  if (stats && 'IntersectionObserver' in window && !reduce.matches) {
+    const nums = [...stats.querySelectorAll('[data-n]')];
+    const run = () => nums.forEach((el) => {
+      const to = parseFloat(el.dataset.n), d = +(el.dataset.d || 0), t0 = performance.now(), T = 1100;
+      const f = (now) => { const p = Math.min(1, (now - t0) / T), e = 1 - Math.pow(1 - p, 3); el.textContent = (to * e).toFixed(d); if (p < 1) requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    });
+    const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); run(); } }, { threshold: .5 });
+    io.observe(stats);
+  }
+
+  /* ---------- MAP: the road from the houses draws to the place you point at ----------
+     Real OSRM road geometry per place (pathLength=1, dashoffset 1 -> 0). The km list
+     rows are buttons (keyboard + touch), the dots are pointer-only (the canvas is
+     aria-hidden; the list is the accessible path). Idle tour: when the map scrolls in,
+     the Golden Circle draws itself one road at a time until the visitor points. */
+  const map = document.querySelector('.map--region');
+  const placesEl = document.querySelector('.places');
+  if (map && placesEl) {
+    const routes = new Map([...map.querySelectorAll('.m-route')].map((r) => [r.dataset.to, r]));
+    const pts = new Map([...map.querySelectorAll('.map-pt[data-place]')].map((p) => [p.dataset.place, p]));
+    const btns = [...placesEl.querySelectorAll('.place[data-place]')];
+    const coarse = matchMedia('(hover:none)').matches;
+    let sel = null, tourT = 0, touched = false;
+    const set = (k) => {
+      if (k === sel) return;
+      if (sel) { routes.get(sel)?.classList.remove('is-on'); pts.get(sel)?.classList.remove('is-on'); }
+      btns.forEach((b) => b.classList.toggle('is-on', b.dataset.place === k));
+      sel = k;
+      map.classList.toggle('has-sel', !!k); placesEl.classList.toggle('has-sel', !!k);
+      if (k) { routes.get(k)?.classList.add('is-on'); pts.get(k)?.classList.add('is-on'); }
+    };
+    const stopTour = () => { touched = true; clearTimeout(tourT); };
+    btns.forEach((b) => {
+      b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { stopTour(); set(b.dataset.place); } });
+      b.addEventListener('focus', () => { stopTour(); set(b.dataset.place); });
+      b.addEventListener('click', () => { stopTour(); set(coarse && sel === b.dataset.place ? null : b.dataset.place); });
+    });
+    pts.forEach((p, k) => {
+      p.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { stopTour(); set(k); } });
+      p.addEventListener('click', () => { stopTour(); set(k); });
+    });
+    placesEl.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') set(null); });
+    placesEl.addEventListener('click', (e) => { if (e.target.closest('.places-tabs')) { stopTour(); set(null); } });
+    map.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') set(null); });
+    const TOUR = ['geysir', 'gullfoss', 'thingvellir', 'selfoss', 'hjalparfoss', 'haifoss', 'fridheimar', 'skalholt'];
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion:reduce)').matches) {
+      let i = 0;
+      const step = () => { if (touched) return; set(TOUR[i % TOUR.length]); i += 1; tourT = setTimeout(step, 2800); };
+      const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); tourT = setTimeout(step, 500); } }, { threshold: .5 });
+      io.observe(map);
+    }
+  }
+
+  /* ---------- PLACES ON A PHONE: one group at a time ----------
+     Under 900px the four groups (Nearby, Golden Circle, Waterfalls, Getting here) share one
+     two-column grid under the map, chosen by the tab row; from 900px every group shows. */
+  const ptabs = document.querySelector('.places-tabs');
+  if (ptabs) {
+    const groups = [...ptabs.parentElement.querySelectorAll('.places-group')];
+    const pick = (i) => {
+      ptabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.g === i)));
+      groups.forEach((g, j) => g.classList.toggle('is-shown', j === i));
+    };
+    ptabs.addEventListener('click', (e) => { const b = e.target.closest('button[data-g]'); if (b) { pick(+b.dataset.g); b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } });
+    pick(0);
+  }
+
+  /* ---------- SAFARI TINT (iOS 26): the status bar and the toolbar take the body colour ----------
+     The page ground lives on <main>; <body> carries the tint: dark while the photographs of the
+     first screen or the footer are in view, the light ground in between. The solid bar is opaque,
+     so the status bar matches it once the bar turns solid. */
+  {
+    const dark = [hero, document.querySelector('.door--opener'), document.querySelector('.door--next'), document.querySelector('.foot')].filter(Boolean);
+    if (dark.length && 'IntersectionObserver' in window) {
+      const on = new Set();
+      const io = new IntersectionObserver((es) => {
+        es.forEach((en) => (en.isIntersecting ? on.add(en.target) : on.delete(en.target)));
+        document.documentElement.classList.toggle('tint-dark', on.size > 0);
+      }, { threshold: 0, rootMargin: '-82% 0px 0px 0px' });
+      dark.forEach((el) => io.observe(el));
+    }
+  }
+
+  /* ---------- REVIEW STREAM: the cards flow left, paused while pointed at or focused;
+     the track holds two identical halves, so -50% loops without a seam; speed 36 px/s. */
+  document.querySelectorAll('.stream').forEach((s) => {
+    const track = s.querySelector('.stream-track');
+    if (!track) return;
+    const size = () => { const w = track.scrollWidth / 2; s.style.setProperty('--stream-d', (w / 36).toFixed(1) + 's'); };
+    size(); addEventListener('resize', size, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(size).catch(() => {});
+    const why = new Set();
+    const pause = (on, r = 'hover') => { on ? why.add(r) : why.delete(r); s.classList.toggle('is-paused', why.size > 0); };
+    const ctl = s.parentElement.querySelector('.stream-ctl');
+    if (ctl) ctl.addEventListener('click', () => { const on = ctl.getAttribute('aria-pressed') !== 'true'; ctl.setAttribute('aria-pressed', String(on)); ctl.textContent = on ? 'Play' : 'Pause'; pause(on, 'user'); });
+    s.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') pause(true); });
+    s.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') pause(false); });
+    /* a finger holds the card still to read it; the stream moves on two seconds after release */
+    let resume = 0;
+    s.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') { clearTimeout(resume); pause(true, 'touch'); } });
+    const letGo = (e) => { if (e.pointerType !== 'mouse') { clearTimeout(resume); resume = setTimeout(() => pause(false, 'touch'), 2000); } };
+    s.addEventListener('pointerup', letGo); s.addEventListener('pointercancel', letGo);
+    s.addEventListener('focusin', () => pause(true, 'focus')); s.addEventListener('focusout', () => pause(false, 'focus'));
+    if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => s.classList.toggle('is-flowing', en.isIntersecting), { threshold: 0 }).observe(s);
+    else s.classList.add('is-flowing');
+  });
+
+  /* ---------- REVIEWS: one verbatim sentence at a time ----------
+     Words leave upward through their .tw masks, the next rise in (28 ms stagger);
+     the hairline fills over 7 s, then the next review. Arrows, ArrowLeft/Right,
+     swipe; paused while pointed at or focused. Reduced motion: a cut, no timer. */
+  const rq = document.querySelector('.rq');
+  const rqData = document.getElementById('rq-data');
+  if (rq && rqData) {
+    const data = JSON.parse(rqData.textContent);
+    const q = rq.querySelector('.rq-q'), who = rq.querySelector('.rq-who'), idx = rq.querySelector('.rq-i'), line = rq.querySelector('.rq-line');
+    const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let i = 0, timer = 0, busy = false, held = false, seen = false;
+    const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    const words = (t) => t.split(' ').map((w, n) => `<span class="tw" style="--i:${n}"><span>${esc(w)}</span></span>`).join(' ');
+    const fill = (r) => {
+      q.innerHTML = words('\u201c' + r.q + '\u201d'); q.dataset.len = r.q.length > 110 ? 'l' : 's';
+      who.innerHTML = [r.who, r.where, r.house].map((x) => `<span>${esc(x)}</span>`).join('<span class="rq-sep">\u00b7</span>');
+    };
+    const arm = () => {
+      clearTimeout(timer); line.classList.remove('is-timing'); void line.offsetWidth;
+      if (reduced || held || !seen) return;
+      line.classList.add('is-timing'); timer = setTimeout(() => go(1), 7000);
+    };
+    const go = (d) => {
+      if (busy) return; busy = true;
+      i = (i + d + data.length) % data.length; idx.textContent = String(i + 1).padStart(2, '0');
+      clearTimeout(timer); line.classList.remove('is-timing');
+      if (reduced) { fill(data[i]); busy = false; arm(); return; }
+      rq.classList.add('is-out');
+      setTimeout(() => {
+        fill(data[i]); rq.classList.remove('is-out'); rq.classList.add('is-enter'); void q.offsetWidth; rq.classList.remove('is-enter');
+        setTimeout(() => { busy = false; }, 700); arm();
+      }, 460);
+    };
+    rq.querySelector('.rq-next').addEventListener('click', () => go(1));
+    rq.querySelector('.rq-prev').addEventListener('click', () => go(-1));
+    rq.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); go(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); } });
+    const hold = (on) => { held = on; arm(); };
+    rq.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hold(true); });
+    rq.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') hold(false); });
+    rq.addEventListener('focusin', () => hold(true));
+    rq.addEventListener('focusout', (e) => { if (!rq.contains(e.relatedTarget)) hold(false); });
+    let x0 = null;
+    rq.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
+    rq.addEventListener('pointerup', (e) => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => { seen = en.isIntersecting; arm(); }, { threshold: .4 }).observe(rq);
+    } else { seen = true; arm(); }
+  }
+
+  /* ---------- BOOKING: the SNDR Bókun sheet ----------
+     The family's range calendar (assets/vendor/sndr-booking.js): two months from
+     768px, one on a phone, arrival then departure, a guests stepper, details, a
+     request the hosts confirm. Opens from every [data-book] (the bar, the stay
+     cards, "check dates for both"); the chosen house closes the nights its
+     Airbnb calendar showed as taken (assets/vendor/taken.js) and sets the cap
+     (10 in a house, 20 for both). Pointer open focuses the sheet itself,
+     keyboard open the first selectable day (focus-guard rule). Preview: the
+     request is never sent. */
+  const book = document.getElementById('book');
+  if (book && window.mountBooking) {
+    const NAME = { v1: 'Mountain Villa', v2: 'Mountain Villa II', both: 'Both houses' };
+    const TAKEN = window.MV_TAKEN || { v1: [], v2: [] };
+    const sets = { v1: new Set(TAKEN.v1), v2: new Set(TAKEN.v2) };
+    sets.both = new Set([...sets.v1, ...sets.v2]);
+    const bar = book.querySelector('.bk-bar');
+    const sub = book.querySelector('#bk-sub');
+    const houseBtns = [...book.querySelectorAll('.bk-house button')];
+    let house = 'v1';
+    const booking = window.mountBooking(book, { min: 2, max: 10, guests: 4, taken: (k) => sets.v1.has(k), onStep: (step) => { bar.scrollTop = 0; book.dataset.step = step; } });
+    const setHouse = (h) => {
+      house = sets[h] ? h : 'v1';
+      houseBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.house === house)));
+      sub.textContent = house === 'both' ? 'Both houses, Flúðir · up to twenty guests' : `${NAME[house]}, Flúðir · the whole house`;
+      booking.setHouse(house === 'both' ? 20 : 10, (k) => sets[house].has(k));
+    };
+    houseBtns.forEach((b) => b.addEventListener('click', () => { if (b.dataset.house !== house) setHouse(b.dataset.house); }));
+    let opener = null;
+    const openBooking = (trigger, viaKey) => {
+      booking.prepare();
+      if (booking.step === 'done') booking.reset();
+      const h = trigger && trigger.dataset.house;
+      if (h && h !== house) setHouse(h);
+      opener = trigger;
+      if (lenis) lenis.stop();
+      document.documentElement.classList.add('bk-open');
+      if (!book.open) book.showModal();
+      (viaKey ? booking.firstDay() || bar : bar).focus({ preventScroll: true });
+    };
+    const closeBooking = () => {
+      if (!book.open) return;
+      book.close();
+      document.documentElement.classList.remove('bk-open');
+      if (lenis) lenis.start();
+      if (opener && opener.focus) opener.focus({ preventScroll: true });
+    };
+    book.addEventListener('cancel', (e) => { e.preventDefault(); closeBooking(); });
+    book.querySelectorAll('[data-book-close]').forEach((el) => el.addEventListener('click', closeBooking));
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-book]');
+      if (!t) return;
+      e.preventDefault();
+      openBooking(t, e.detail === 0);
+    });
+    setHouse('v1');
+  }
+
+  /* ---------- BAR: brand hides on the home hero, bar goes solid after 120 px ----------
+     Two sentinels and IntersectionObserver, so no scroll listener. */
+  const bar = document.querySelector('.bar');
+  if (bar && 'IntersectionObserver' in window) {
+    const solidS = document.createElement('i'); solidS.style.cssText = 'position:absolute;top:120px;left:0;width:1px;height:1px;pointer-events:none';
+    document.body.appendChild(solidS);
+    new IntersectionObserver(([en]) => bar.classList.toggle('is-solid', !en.isIntersecting), { threshold: 0 }).observe(solidS);
+    /* The name hands over between the seam and the bar: the bar's name shows whenever the big
+       wordmark is not wholly in view below the bar. (It used to hide at a fixed 62vh, which on the
+       way back up left a stretch with no name at all: the big one was still above the screen.) */
+    const wmBig = hero && hero.querySelector('.wm');
+    if (bar.classList.contains('is-home') && wmBig) {
+      bar.classList.add('is-brand-out');
+      new IntersectionObserver(([en]) => bar.classList.toggle('is-brand-out', en.isIntersecting && en.intersectionRatio > 0.98),
+        { rootMargin: `-${bar.offsetHeight + 8}px 0px 0px 0px`, threshold: [0, 0.5, 0.98, 1] }).observe(wmBig);
+    }
   }
 
   /* ---------- CHAPTER REVEALS ---------- */
@@ -351,6 +574,10 @@
       done.focus({ preventScroll: true });
     });
     req.addEventListener('input', (e) => e.target.removeAttribute('aria-invalid'));
+    document.querySelectorAll('[data-pick]').forEach((a) => a.addEventListener('click', () => {
+      const b = opts.find((o) => o.dataset.key === a.dataset.pick);
+      if (b && which !== b.dataset.key) b.click();
+    }));
     mark();
     paintGuests();
     sync();
