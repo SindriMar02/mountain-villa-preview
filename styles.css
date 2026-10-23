@@ -1759,3 +1759,15 @@ html.js{scroll-behavior:auto}
   .bk .bk-d:hover:not(:disabled):not(.start):not(.end):not(.short):not(.beyond){background:color-mix(in srgb,var(--forest) 14%,transparent)}
 }
 @media (max-height:500px) and (orientation:landscape){ .bk .bk-d{height:34px;font-size:14px} .bk .bk-d.today::after{bottom:4px} }
+
+/* ===== One reset for every control on every page (Sindri 23 Oct: "still some 3d looking buttons? like for
+   the X etc ... across the entire prototype"). The browser's own button and field chrome (outset bevel,
+   native rendering, iOS inner shadow and rounding) is switched off everywhere; each component then draws
+   its own flat, square style. Element selectors, so every class rule that sets a border still wins. */
+:where(button,[type="button"],[type="submit"],[type="reset"]){-webkit-appearance:none;appearance:none;border:0;border-radius:0;background-color:transparent;color:inherit;font:inherit;margin:0}
+:where(input,textarea,select){-webkit-appearance:none;appearance:none;border-radius:0;box-shadow:none}
+/* :where() = zero specificity: it removes only the browser's chrome and never beats a component's own border */
+/* the sheet's close: a flat icon, no box */
+.bk .bk-x{border:0;background:none;color:var(--forest);transition:background-color .15s ease,transform .16s var(--ease)}
+@media (hover:hover) and (pointer:fine){ .bk .bk-x:hover{background:color-mix(in srgb,var(--forest) 8%,transparent)} }
+.bk .bk-x:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
