@@ -393,7 +393,7 @@
     const setHouse = (h) => {
       house = sets[h] ? h : 'v1';
       houseBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.house === house)));
-      sub.textContent = house === 'both' ? 'Both houses, Flúðir · up to twenty guests' : `${NAME[house]}, Flúðir · the whole house`;
+      sub.textContent = house === 'both' ? 'Both houses, Flúðir · Up to 20 guests' : `${NAME[house]}, Flúðir · The whole house`;
       booking.setHouse(house === 'both' ? 20 : 10, (k) => sets[house].has(k));
     };
     houseBtns.forEach((b) => b.addEventListener('click', () => { if (b.dataset.house !== house) setHouse(b.dataset.house); }));

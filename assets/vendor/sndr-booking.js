@@ -106,7 +106,7 @@ function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep
     const block = st.start && !st.end ? blockAfter(st.start) : '';
     if (block && k > block) {
       st.start = k; st.end = ''; st.hover = ''; st.focus = k; sync();
-      say(`The house is booked from ${fShort.format(at(block))}, so ${fShort.format(at(k))} is your new arrival. Now choose your departure.`); return;
+      say(`Those dates cross nights that are already booked, so ${fShort.format(at(k))} is now your arrival. Choose your departure.`); return;
     }
     if (!st.start || st.end || k <= st.start) { st.start = k; st.end = ''; }
     else if (k < iso(addDays(at(st.start), min))) { say(`Minimum stay is ${plural(min, 'night')}.`); st.focus = k; paint(); return; }
