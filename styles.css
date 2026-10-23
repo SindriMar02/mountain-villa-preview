@@ -1734,3 +1734,28 @@ html[data-theme="forest"] .bk-end{background:#F2F4EF}
    that jump into a glide and every start/end lands off by the scroll position (the hero name stayed faded
    after a resize mid-page). With scripts, anchors glide in JS instead (app.js). */
 html.js{scroll-behavior:auto}
+
+/* ===== Calendar days, flat (Sindri 23 Oct: "more modern, look too much like old 3d ish") =====
+   The bevel was the browser's default button border (2px outset), never reset. Now: square flat cells
+   with a 4px gap; open days a faint tint of the ink, closed days bare, booked nights struck, the chosen
+   arrival and departure solid ink, the nights between a deeper tint, today a small dot. */
+.bk .bk-days{gap:4px}
+.bk .bk-dow{gap:4px}
+.bk .bk-d{-webkit-appearance:none;appearance:none;border:0;border-radius:0;position:relative;height:44px;
+  font:500 15px/1 var(--body);color:var(--forest);background:color-mix(in srgb,var(--forest) 6%,transparent);
+  transition:background-color .15s ease,color .15s ease,box-shadow .15s ease}
+.bk .bk-d:disabled,.bk .bk-d.bk-taken{background:transparent;color:color-mix(in srgb,var(--forest) 30%,transparent)}
+.bk .bk-d.bk-taken.bk-out{background:color-mix(in srgb,var(--forest) 6%,transparent);color:var(--forest)}
+.bk .bk-d.short,.bk .bk-d.beyond{background:transparent;color:color-mix(in srgb,var(--forest) 40%,transparent)}
+.bk .bk-d.pv{background:color-mix(in srgb,var(--forest) 16%,transparent)}
+.bk .bk-d.in{background:color-mix(in srgb,var(--forest) 24%,transparent)}
+.bk .bk-d.pv-end{box-shadow:inset 0 0 0 1.5px var(--forest)}
+.bk .bk-d.start,.bk .bk-d.end{background:var(--forest);color:#fff}
+.bk .bk-d.today{text-decoration:none}
+.bk .bk-d.bk-taken.today{text-decoration:line-through}
+.bk .bk-d.today::after{content:'';position:absolute;left:50%;bottom:7px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
+.bk .bk-d:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){
+  .bk .bk-d:hover:not(:disabled):not(.start):not(.end):not(.short):not(.beyond){background:color-mix(in srgb,var(--forest) 14%,transparent)}
+}
+@media (max-height:500px) and (orientation:landscape){ .bk .bk-d{height:34px;font-size:14px} .bk .bk-d.today::after{bottom:4px} }
