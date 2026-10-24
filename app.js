@@ -234,6 +234,12 @@
   if (map && placesEl) {
     const routes = new Map([...map.querySelectorAll('.m-route')].map((r) => [r.dataset.to, r]));
     const pts = new Map([...map.querySelectorAll('.map-pt[data-place]')].map((p) => [p.dataset.place, p]));
+    const svg = map.querySelector('.m-routes')?.ownerSVGElement;
+    if (svg) {
+      const vb = svg.viewBox.baseVal;
+      const fit = () => { const r = svg.getBoundingClientRect(); map.style.setProperty('--k', (Math.max(r.width / vb.width, r.height / vb.height, 1) * 1.02).toFixed(3)); };
+      fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(svg);
+    }
     const btns = [...placesEl.querySelectorAll('.place[data-place]')];
     const coarse = matchMedia('(hover:none)').matches;
     let sel = null, tourT = 0, touched = false;

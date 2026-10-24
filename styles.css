@@ -1060,8 +1060,9 @@ html.bk-open{overflow:hidden}
    the houses (OSRM, _parts/osrm-routes.json) draws itself to the place you point at, in the list
    or on the map; the point lights and says km · min. When the map scrolls in, the Golden Circle
    draws itself one road at a time until the visitor points at something. */
+/* non-scaling-stroke lays the dash in screen px, so --k (the map's on-screen scale, set in app.js) stretches it to the whole road */
 .m-route{fill:none;stroke:var(--salt);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
-  stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset .5s var(--e-out),opacity .2s linear .3s}
+  stroke-dasharray:var(--k,1);stroke-dashoffset:var(--k,1);opacity:0;transition:stroke-dashoffset .5s var(--e-out),opacity .2s linear .3s}
 .m-route.is-on{stroke-dashoffset:0;opacity:1;transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1),opacity .2s linear}
 .map-pt i{transition:transform .3s var(--e-out),background-color .3s linear}
 .map-pt.is-on i{background:var(--salt);transform:scale(1.5)}
