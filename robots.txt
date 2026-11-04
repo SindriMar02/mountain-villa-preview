@@ -1,2 +1,3 @@
+# Design preview: kept out of search. The production build (MV_ENV=production) allows all and lists the sitemap.
 User-agent: *
 Disallow: /

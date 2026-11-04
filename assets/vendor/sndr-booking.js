@@ -7,7 +7,7 @@
 // confirmation: every future night shows as open, the summary counts nights only, and the final state says plainly
 // that this is the preview. The production layer swaps `submitRequest` for the real engine and `openNights` for the
 // synced calendar.
-function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep = () => {}, taken = () => false } = {}) {
+function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep = () => {}, taken = () => false, submit = null } = {}) {
   let maxN = max, takenFn = taken;   // Mountain Villas: both change with the chosen house
   const $ = (s, c = root) => c.querySelector(s);
   const $$ = (s, c = root) => [...c.querySelectorAll(s)];
@@ -162,8 +162,9 @@ function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep
   plus.addEventListener('click', () => { st.guests += 1; fit(); });
   wide.addEventListener('change', () => { if (st.drawn) render(); });
   back.addEventListener('click', () => setStep('dates'));
-  // the production layer replaces this with the SNDR Bókun request call
-  const submitRequest = async () => new Promise((r) => setTimeout(r, 650));
+  // `submit` (optional) is the SNDR Bókun request call: it gets the stay and the guest, and answers
+  // { ok: true, delivered } or { ok: false, message }. Without it the sheet stays the design preview.
+  const submitRequest = submit || (async () => { await new Promise((r) => setTimeout(r, 650)); return { ok: true, delivered: false }; });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (st.step === 'dates') {
@@ -171,12 +172,20 @@ function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep
       say(''); setStep('who'); $('input[name="name"]')?.focus({ preventScroll: true }); return;
     }
     if (st.step === 'who') {
-      const name = $('input[name="name"]'), email = $('input[name="email"]');
-      const bad = [name, email].find((i) => !i.value.trim() || (i.type === 'email' && !i.checkValidity()));
-      if (bad) { say(bad === name ? 'Add your name so the host knows who is asking.' : 'Add an email address the host can reply to.'); bad.focus(); return; }
+      const name = $('input[name="name"]'), email = $('input[name="email"]'), phone = $('input[name="phone"]'), terms = $('input[name="terms"]');
+      const ask = { name: 'Add your name so the host knows who is asking.', email: 'Add an email address the host can reply to.', phone: 'Add a phone number the host can reach you on during the stay.' };
+      const bad = [name, email, phone].filter(Boolean).find((i) => (i.required && !i.value.trim()) || (i.type === 'email' && !i.checkValidity()));
+      if (bad) { say(ask[bad.name]); bad.focus(); return; }
+      if (terms && !terms.checked) { say('Please read and accept the house rules and booking terms.'); terms.focus(); return; }
       say(''); action.disabled = true; action.classList.add('is-busy'); actionLabel.textContent = 'Sending…';
-      await submitRequest();
+      let res;
+      try {
+        res = await submitRequest({ start: st.start, end: st.end, nights: nights(), guests: st.guests, name: name.value.trim(), email: email.value.trim(), phone: phone ? phone.value.trim() : '', message: ($('textarea[name="message"]')?.value || '').trim() });
+      } catch (err) { res = { ok: false, message: 'The request could not be sent. Check your connection and try again.' }; }
       action.disabled = false; action.classList.remove('is-busy');
+      if (!res || !res.ok) { actionLabel.textContent = 'Send request'; say((res && res.message) || 'The request could not be sent. Please try again.'); return; }
+      const fp = $('.bk-done .fine-print');
+      if (fp) fp.textContent = res.delivered ? (fp.dataset.delivered || fp.textContent) : (fp.dataset.preview || fp.textContent);
       $('.bk-done-dates').textContent = `${fLong.format(at(st.start))} to ${fLong.format(at(st.end))}, ${plural(nights(), 'night')}, ${plural(st.guests, 'guest')}.`;
       $('.bk-done-name').textContent = name.value.trim();
       setStep('done'); $('.bk-done h3')?.focus({ preventScroll: true });

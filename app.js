@@ -40,6 +40,7 @@
     ST.config({ ignoreMobileResize: true });
     if (fine && window.Lenis) {
       lenis = new window.Lenis({ lerp: 0.085, wheelMultiplier: 1, autoRaf: false });
+      window.MV_LENIS = lenis;   // pages.js: the menu stops and starts the scroll (4 Nov)
       lenis.on('scroll', ST.update);
       G.ticker.add((t) => lenis.raf(t * 1000));
     }
@@ -212,7 +213,7 @@
   }
 
   /* ---------- PROOF BAND: the values count up once, as the band reveals ---------- */
-  const stats = document.querySelector('.ledger');
+  document.querySelectorAll('.ledger').forEach((stats) => {   // the statement's and the hosts' ledgers
   if (stats && 'IntersectionObserver' in window && !reduce.matches) {
     const nums = [...stats.querySelectorAll('[data-n]')];
     const run = () => nums.forEach((el) => {
@@ -223,6 +224,7 @@
     const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); run(); } }, { threshold: .5 });
     io.observe(stats);
   }
+  });
 
   /* ---------- MAP: the road from the houses draws to the place you point at ----------
      Real OSRM road geometry per place (pathLength=1, dashoffset 1 -> 0). The km list
@@ -254,7 +256,9 @@
     const stopTour = () => { touched = true; clearTimeout(tourT); };
     btns.forEach((b) => {
       b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { stopTour(); set(b.dataset.place); } });
-      b.addEventListener('focus', () => { stopTour(); set(b.dataset.place); });
+      // keyboard focus only: a tap that focuses the button (Android Chrome) must not select it right before
+      // the click toggles it off again (4 Nov: the first tap drew nothing). focus-guard marks the input kind.
+      b.addEventListener('focus', () => { if (document.documentElement.dataset.input === 'pointer') return; stopTour(); set(b.dataset.place); });
       b.addEventListener('click', () => { stopTour(); set(coarse && sel === b.dataset.place ? null : b.dataset.place); });
     });
     pts.forEach((p, k) => {
@@ -292,7 +296,7 @@
      first screen or the footer are in view, the light ground in between. The solid bar is opaque,
      so the status bar matches it once the bar turns solid. */
   {
-    const dark = [hero, document.querySelector('.door--opener'), document.querySelector('.door--next'), document.querySelector('.foot')].filter(Boolean);
+    const dark = [hero, document.querySelector('.door--opener'), document.querySelector('.door--next'), document.querySelector('.pg-head'), document.querySelector('.foot')].filter(Boolean);
     if (dark.length && 'IntersectionObserver' in window) {
       const on = new Set();
       const io = new IntersectionObserver((es) => {
@@ -383,8 +387,8 @@
      cards, "check dates for both"); the chosen house closes the nights its
      Airbnb calendar showed as taken (assets/vendor/taken.js) and sets the cap
      (10 in a house, 20 for both). Pointer open focuses the sheet itself,
-     keyboard open the first selectable day (focus-guard rule). Preview: the
-     request is never sent. */
+     keyboard open the first selectable day (focus-guard rule). The request goes to
+     the owners' demo dashboard (see `submit` below). */
   const book = document.getElementById('book');
   if (book && window.mountBooking) {
     const NAME = { v1: 'Mountain Villa', v2: 'Mountain Villa II', both: 'Both houses' };
@@ -395,7 +399,32 @@
     const sub = book.querySelector('#bk-sub');
     const houseBtns = [...book.querySelectorAll('.bk-house button')];
     let house = 'v1';
-    const booking = window.mountBooking(book, { min: 2, max: 10, guests: 4, taken: (k) => sets.v1.has(k), onStep: (step) => { bar.scrollTop = 0; book.dataset.step = step; } });
+    /* SNDR Bókun: the request goes to the owners' demo dashboard (Worker sndr-demo-mv, tenant
+       mountainvilla, demo: true, no guest mail). The engine re-checks capacity, minimum stay and
+       lead time, so the sheet is never the only guard. Both houses = one request per house,
+       guests split between them. If the API cannot be reached the sheet says so and keeps the
+       guest's details; nothing pretends to have been sent. */
+    const API = 'https://sndr-demo-mv.sindri-381.workers.dev';
+    const sendOne = async (resourceId, people, r, both) => {
+      const res = await fetch(`${API}/booking/request`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resourceId, date: r.start, endDate: r.end, people, lang: 'en',
+          customer: { name: r.name, email: r.email, phone: r.phone },
+          note: [both ? `Both houses: ${r.guests} guests in all.` : '', r.message, 'House rules and booking terms accepted.'].filter(Boolean).join(' ') }),
+      });
+      const out = await res.json().catch(() => ({}));
+      return res.ok && out.ok !== false ? { ok: true } : { ok: false, message: out.message || (out.messages && out.messages[0]) || 'The hosts could not take these dates. Please try other dates.' };
+    };
+    const submit = async (r) => {
+      try {
+        if (house !== 'both') { const one = await sendOne(house, r.guests, r, false); return one.ok ? { ok: true, delivered: true } : one; }
+        const a = Math.ceil(r.guests / 2), b = r.guests - a;
+        const first = await sendOne('v1', a, r, true); if (!first.ok) return first;
+        const second = b > 0 ? await sendOne('v2', b, r, true) : { ok: true };
+        return second.ok ? { ok: true, delivered: true } : { ok: false, message: `Mountain Villa is requested, Mountain Villa II could not be: ${second.message}` };
+      } catch (_) { return { ok: false, message: 'The request could not reach the hosts. Check your connection and try again.' }; }
+    };
+    const booking = window.mountBooking(book, { min: 2, max: 10, guests: 4, submit, taken: (k) => sets.v1.has(k), onStep: (step) => { bar.scrollTop = 0; book.dataset.step = step; } });
     const setHouse = (h) => {
       house = sets[h] ? h : 'v1';
       houseBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.house === house)));
@@ -439,7 +468,7 @@
   if (bar && 'IntersectionObserver' in window) {
     const solidS = document.createElement('i'); solidS.style.cssText = 'position:absolute;top:120px;left:0;width:1px;height:1px;pointer-events:none';
     document.body.appendChild(solidS);
-    new IntersectionObserver(([en]) => bar.classList.toggle('is-solid', !en.isIntersecting), { threshold: 0 }).observe(solidS);
+    new IntersectionObserver(([en]) => bar.classList.toggle('is-solid', bar.classList.contains('is-plain') || !en.isIntersecting), { threshold: 0 }).observe(solidS);
     /* The name hands over between the seam and the bar: the bar's name shows whenever the big
        wordmark is not wholly in view below the bar. (It used to hide at a fixed 62vh, which on the
        way back up left a stretch with no name at all: the big one was still above the screen.) */
@@ -449,6 +478,25 @@
       new IntersectionObserver(([en]) => bar.classList.toggle('is-brand-out', en.isIntersecting && en.intersectionRatio > 0.98),
         { rootMargin: `-${bar.offsetHeight + 8}px 0px 0px 0px`, threshold: [0, 0.5, 0.98, 1] }).observe(wmBig);
     }
+  }
+
+  /* ---------- THOR'S APPAREL: three small windows cross-fade through the shop's product photos ----------
+     Staggered so only one window changes at a time; every next photo is decoded before it fades in
+     (no half-drawn frame); runs only while the strip is on screen and the tab is visible; still under
+     reduced motion (the first photo of each window stays). */
+  const merch = document.querySelector('.merch-wins');
+  if (merch && !reduce.matches && 'IntersectionObserver' in window) {
+    const wins = [...merch.querySelectorAll('.merch-win')].map((w) => ({ imgs: [...w.querySelectorAll('img')], i: 0 }));
+    let timer = 0, turn = 0, onScreen = false;
+    const step = async () => {
+      const w = wins[turn % wins.length]; turn += 1;
+      const next = (w.i + 1) % w.imgs.length, img = w.imgs[next];
+      try { if (img.decode) await img.decode(); } catch (_) { /* show it anyway */ }
+      w.imgs[w.i].classList.remove('is-on'); img.classList.add('is-on'); w.i = next;
+    };
+    const run = () => { clearInterval(timer); timer = 0; if (onScreen && !document.hidden) timer = setInterval(step, 1400); };
+    new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; run(); }, { threshold: 0.2 }).observe(merch);
+    document.addEventListener('visibilitychange', run);
   }
 
   /* ---------- CHAPTER REVEALS ---------- */
