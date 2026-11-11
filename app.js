@@ -237,9 +237,10 @@
     const routes = new Map([...map.querySelectorAll('.m-route')].map((r) => [r.dataset.to, r]));
     const pts = new Map([...map.querySelectorAll('.map-pt[data-place]')].map((p) => [p.dataset.place, p]));
     const svg = map.querySelector('.m-routes')?.ownerSVGElement;
+    let fit = () => {};
     if (svg) {
       const vb = svg.viewBox.baseVal;
-      const fit = () => { const r = svg.getBoundingClientRect(); map.style.setProperty('--k', (Math.max(r.width / vb.width, r.height / vb.height, 1) * 1.02).toFixed(3)); };
+      fit = () => { const r = svg.getBoundingClientRect(); map.style.setProperty('--k', (Math.max(r.width / vb.width, r.height / vb.height, 1) * 1.02).toFixed(3)); };
       fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(svg);
     }
     const btns = [...placesEl.querySelectorAll('.place[data-place]')];
@@ -274,6 +275,151 @@
       const step = () => { if (touched) return; set(TOUR[i % TOUR.length]); i += 1; tourT = setTimeout(step, 2800); };
       const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); tourT = setTimeout(step, 500); } }, { threshold: .5 });
       io.observe(map);
+    }
+
+    /* ZOOM (Nov 2026, Hafþór asked for it): + / − / reset buttons, trackpad pinch and ⌘ or Ctrl + scroll,
+       double-click, drag to pan, two-finger pinch on a phone. The svg zooms through its viewBox, so the roads
+       stay crisp (non-scaling strokes) and the route dash refits through --k; the HTML pins move to their own
+       map coordinates, so the dots and labels keep their size. A plain wheel and a one-finger swipe still
+       scroll the page (touch-action pan-y until zoomed in). */
+    const canvas = map.querySelector('.map-canvas');
+    if (svg && canvas) {
+      const W = svg.viewBox.baseVal.width, H = svg.viewBox.baseVal.height, ZMAX = 6;
+      const pins = [...canvas.querySelectorAll('.map-pt, .map-edge')].map((el) => ({ el,
+        x: el.style.left ? parseFloat(el.style.left) / 100 * W : null, y: el.style.top ? parseFloat(el.style.top) / 100 * H : null }));
+      const scaleEl = canvas.querySelector('.map-scale'), scaleEm = scaleEl?.querySelector('em');
+      const scaleW = scaleEl ? parseFloat(scaleEl.style.width) : 0;   // % of the width for 10 km at zoom 1
+      const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+      const ico = (d) => `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+      const ctl = document.createElement('div');
+      ctl.className = 'map-zoom';
+      ctl.innerHTML = `<button type="button" class="mz-in" aria-label="Zoom in on the map">${ico('M8 2v12M2 8h12')}</button>`
+        + `<button type="button" class="mz-out" aria-label="Zoom out on the map">${ico('M2 8h12')}</button>`
+        + `<button type="button" class="mz-reset" aria-label="Show the whole map" hidden>${ico('M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4')}</button>`;
+      const hint = document.createElement('p');
+      hint.className = 'map-hint'; hint.setAttribute('aria-hidden', 'true');
+      hint.textContent = `Pinch or ${mac ? '⌘' : 'Ctrl'} + scroll to zoom`;
+      map.append(ctl, hint);
+      const [zIn, zOut, zReset] = ctl.querySelectorAll('button');
+      let z = 1, cx = W / 2, cy = H / 2, anim = 0, hintT = 0;
+      const apply = () => {
+        z = Math.min(ZMAX, Math.max(1, z));
+        const w = W / z, h = H / z;
+        cx = Math.min(W - w / 2, Math.max(w / 2, cx)); cy = Math.min(H - h / 2, Math.max(h / 2, cy));
+        const x0 = cx - w / 2, y0 = cy - h / 2;
+        svg.setAttribute('viewBox', `${x0.toFixed(2)} ${y0.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+        pins.forEach((p) => {
+          let out = false;
+          if (p.x !== null) { const u = (p.x - x0) / w; p.el.style.left = (u * 100).toFixed(3) + '%'; out = out || u < -0.01 || u > 1.01; }
+          if (p.y !== null) { const v = (p.y - y0) / h; p.el.style.top = (v * 100).toFixed(3) + '%'; out = out || v < -0.01 || v > 1.01; }
+          p.el.style.visibility = out ? 'hidden' : '';
+        });
+        if (scaleEl) {
+          let km = 10;
+          for (const k of [10, 5, 2, 1]) { km = k; if (scaleW * z * k / 10 <= 16) break; }
+          scaleEl.style.width = (scaleW * z * km / 10).toFixed(2) + '%';
+          scaleEm.innerHTML = km + '&nbsp;km';
+        }
+        const zoomed = z > 1.01;
+        map.classList.toggle('is-zoomed', zoomed);
+        canvas.style.touchAction = zoomed ? 'none' : 'pan-y';
+        const atMax = z >= ZMAX - 0.01;
+        // a control that disables under the keyboard hands focus to its partner, so focus never drops to the page
+        if (atMax && document.activeElement === zIn) zOut.focus();
+        if (!zoomed && document.activeElement === zOut) zIn.focus();
+        zOut.disabled = !zoomed; zIn.disabled = atMax;
+        if (zReset.hidden === zoomed) {
+          if (!zoomed && document.activeElement === zReset) zOut.focus();
+          zReset.hidden = !zoomed;
+        }
+        fit();
+      };
+      // client point -> map units (the canvas box is the whole map, even where the band crops it)
+      const toMap = (x, y) => {
+        const r = canvas.getBoundingClientRect(), w = W / z, h = H / z;
+        return [cx - w / 2 + (x - r.left) / r.width * w, cy - h / 2 + (y - r.top) / r.height * h];
+      };
+      // zoom to nz keeping the map point (mx, my) where it is on screen
+      const zoomAt = (nz, mx, my) => { nz = Math.min(ZMAX, Math.max(1, nz)); const k = z / nz; cx = mx + (cx - mx) * k; cy = my + (cy - my) * k; z = nz; apply(); };
+      const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+      const animTo = (nz, mx = cx, my = cy) => {
+        cancelAnimationFrame(anim); stopTour();
+        nz = Math.min(ZMAX, Math.max(1, nz));
+        if (reduce) { zoomAt(nz, mx, my); return; }
+        const z0 = z, t0 = performance.now(), D = 340;
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - p, 3);
+          zoomAt(z0 * Math.pow(nz / z0, e), mx, my);
+          if (p < 1) anim = requestAnimationFrame(tick);
+        };
+        anim = requestAnimationFrame(tick);
+      };
+      zIn.addEventListener('click', () => animTo(z * 2));
+      zOut.addEventListener('click', () => animTo(z / 2));
+      zReset.addEventListener('click', () => animTo(1));
+      // keyboard on the controls: arrows pan, + and - zoom, 0 shows the whole map
+      ctl.addEventListener('keydown', (e) => {
+        const step = 0.2, w = W / z, h = H / z;
+        const pan = { ArrowLeft: [-step * w, 0], ArrowRight: [step * w, 0], ArrowUp: [0, -step * h], ArrowDown: [0, step * h] }[e.key];
+        if (pan && z > 1.01) { e.preventDefault(); stopTour(); cx += pan[0]; cy += pan[1]; apply(); }
+        else if (e.key === '+' || e.key === '=') { e.preventDefault(); animTo(z * 2); }
+        else if (e.key === '-' || e.key === '_') { e.preventDefault(); animTo(z / 2); }
+        else if (e.key === '0') { e.preventDefault(); animTo(1); }
+      });
+      // trackpad pinch arrives as a wheel with ctrlKey; ⌘/Ctrl + wheel zooms; a plain wheel scrolls the page and shows the hint
+      canvas.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault(); cancelAnimationFrame(anim); stopTour();
+          const d = Math.max(-60, Math.min(60, e.deltaMode ? e.deltaY * 16 : e.deltaY));
+          const [mx, my] = toMap(e.clientX, e.clientY);
+          zoomAt(z * Math.exp(-d * 0.008), mx, my);
+        } else if (!coarse) {
+          hint.classList.add('is-on'); clearTimeout(hintT); hintT = setTimeout(() => hint.classList.remove('is-on'), 1300);
+        }
+      }, { passive: false });
+      canvas.addEventListener('dblclick', (e) => { const [mx, my] = toMap(e.clientX, e.clientY); animTo(z * 2, mx, my); });
+      // drag to pan (zoomed in), two fingers to pinch; a drag never also clicks a place
+      const ptrs = new Map();
+      let drag = null, pinch = null, moved = false;
+      const startDrag = (x, y) => { drag = { x, y, cx, cy }; };
+      canvas.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+        if (ptrs.size === 1) moved = false;
+        if (ptrs.size === 2) {
+          const [a, b] = [...ptrs.values()];
+          pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z, mid: toMap((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) };
+          drag = null; cancelAnimationFrame(anim); stopTour();
+        } else if (ptrs.size === 1 && z > 1.01) startDrag(e.clientX, e.clientY);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!ptrs.has(e.pointerId)) return;
+        ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+        if (pinch && ptrs.size >= 2) {
+          const [a, b] = [...ptrs.values()];
+          const r = canvas.getBoundingClientRect();
+          z = Math.min(ZMAX, Math.max(1, pinch.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d));
+          const w = W / z, h = H / z;
+          const fx = ((a[0] + b[0]) / 2 - r.left) / r.width, fy = ((a[1] + b[1]) / 2 - r.top) / r.height;
+          cx = pinch.mid[0] - fx * w + w / 2; cy = pinch.mid[1] - fy * h + h / 2;
+          moved = true; apply(); return;
+        }
+        if (!drag) return;
+        const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if (!moved && Math.hypot(dx, dy) < 5) return;
+        if (!moved) { moved = true; stopTour(); canvas.classList.add('is-dragging'); try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* gone */ } }
+        const r = canvas.getBoundingClientRect();
+        cx = drag.cx - dx / r.width * (W / z); cy = drag.cy - dy / r.height * (H / z); apply();
+      });
+      const up = (e) => {
+        if (!ptrs.delete(e.pointerId)) return;
+        if (ptrs.size < 2) pinch = null;
+        if (!ptrs.size) { drag = null; canvas.classList.remove('is-dragging'); }
+        else if (ptrs.size === 1 && z > 1.01) { const [p] = [...ptrs.values()]; startDrag(p[0], p[1]); }
+      };
+      ['pointerup', 'pointercancel'].forEach((t) => canvas.addEventListener(t, up));
+      canvas.addEventListener('click', (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+      apply();
     }
   }
 
