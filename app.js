@@ -263,7 +263,7 @@
       b.addEventListener('click', () => { stopTour(); set(coarse && sel === b.dataset.place ? null : b.dataset.place); });
     });
     pts.forEach((p, k) => {
-      p.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { stopTour(); set(k); } });
+      p.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && !e.buttons) { stopTour(); set(k); } });
       p.addEventListener('click', () => { stopTour(); set(k); });
     });
     placesEl.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') set(null); });
@@ -288,6 +288,7 @@
       const pins = [...canvas.querySelectorAll('.map-pt, .map-edge')].map((el) => ({ el,
         x: el.style.left ? parseFloat(el.style.left) / 100 * W : null, y: el.style.top ? parseFloat(el.style.top) / 100 * H : null }));
       const scaleEl = canvas.querySelector('.map-scale'), scaleEm = scaleEl?.querySelector('em');
+      if (scaleEl) { scaleEl.setAttribute('aria-hidden', 'true'); map.append(scaleEl); }   // the canvas is cropped top and bottom on desktop
       const scaleW = scaleEl ? parseFloat(scaleEl.style.width) : 0;   // % of the width for 10 km at zoom 1
       const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
       const ico = (d) => `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -329,7 +330,7 @@
         if (!zoomed && document.activeElement === zOut) zIn.focus();
         zOut.disabled = !zoomed; zIn.disabled = atMax;
         if (zReset.hidden === zoomed) {
-          if (!zoomed && document.activeElement === zReset) zOut.focus();
+          if (!zoomed && document.activeElement === zReset) zIn.focus();
           zReset.hidden = !zoomed;
         }
         fit();
@@ -369,7 +370,7 @@
       // trackpad pinch arrives as a wheel with ctrlKey; ⌘/Ctrl + wheel zooms; a plain wheel scrolls the page and shows the hint
       canvas.addEventListener('wheel', (e) => {
         if (e.ctrlKey || e.metaKey) {
-          e.preventDefault(); cancelAnimationFrame(anim); stopTour();
+          e.preventDefault(); e.stopPropagation(); cancelAnimationFrame(anim); stopTour();
           const d = Math.max(-60, Math.min(60, e.deltaMode ? e.deltaY * 16 : e.deltaY));
           const [mx, my] = toMap(e.clientX, e.clientY);
           zoomAt(z * Math.exp(-d * 0.008), mx, my);
