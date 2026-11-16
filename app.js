@@ -346,11 +346,12 @@
         const on = sel && z > 1.01 ? pts.get(sel) : null;
         const mine = on ? [...on.querySelectorAll('b, .map-km')].map((e) => e.getBoundingClientRect()).filter((r) => r.width) : [];
         pins.forEach(({ el }) => {
-          if (el === on || !el.classList.contains('map-pt')) return;
+          if (!el.classList.contains('map-pt')) return;
           const b = el.querySelector('b');
           if (!b) return;
           let hide = false;
-          if (mine.length) {
+          // the picked place is never masked, even if the previous pick had covered it (Codex re-check, 16 Nov)
+          if (mine.length && el !== on) {
             const q = b.getBoundingClientRect();
             hide = q.width > 0 && mine.some((r) => r.left < q.right - 1 && r.right > q.left + 1 && r.top < q.bottom - 1 && r.bottom > q.top + 1);
           }
