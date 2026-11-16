@@ -246,13 +246,15 @@
     const btns = [...placesEl.querySelectorAll('.place[data-place]')];
     const coarse = matchMedia('(hover:none)').matches;
     let sel = null, tourT = 0, touched = false;
+    let reveal = () => {};   // set by the zoom block below: keeps a picked place's label inside a zoomed map
     const set = (k) => {
-      if (k === sel) return;
+      if (k === sel) { if (k) reveal(k); return; }
       if (sel) { routes.get(sel)?.classList.remove('is-on'); pts.get(sel)?.classList.remove('is-on'); }
       btns.forEach((b) => b.classList.toggle('is-on', b.dataset.place === k));
       sel = k;
       map.classList.toggle('has-sel', !!k); placesEl.classList.toggle('has-sel', !!k);
       if (k) { routes.get(k)?.classList.add('is-on'); pts.get(k)?.classList.add('is-on'); }
+      reveal(k);
     };
     const stopTour = () => { touched = true; clearTimeout(tourT); };
     btns.forEach((b) => {
@@ -323,6 +325,7 @@
         }
         const zoomed = z > 1.01;
         map.classList.toggle('is-zoomed', zoomed);
+        map.classList.toggle('is-close', z >= 5);   // phones: the closest places' dots (Hrunalaug) only at full zoom
         canvas.style.touchAction = zoomed ? 'none' : 'pan-y';
         const atMax = z >= ZMAX - 0.01;
         // a control that disables under the keyboard hands focus to its partner, so focus never drops to the page
@@ -334,6 +337,25 @@
           zReset.hidden = !zoomed;
         }
         fit();
+        mask();
+      };
+      /* On a zoomed map the picked place's name and distance win: a neighbour's label it would cover is hidden
+         until the pick changes or the map moves off it (16 Nov: Hrunalaug's distance sat on MOUNTAIN VILLAS and
+         Secret Lagoon on a phone at full zoom; geography leaves no free side there). */
+      const mask = () => {
+        const on = sel && z > 1.01 ? pts.get(sel) : null;
+        const mine = on ? [...on.querySelectorAll('b, .map-km')].map((e) => e.getBoundingClientRect()).filter((r) => r.width) : [];
+        pins.forEach(({ el }) => {
+          if (el === on || !el.classList.contains('map-pt')) return;
+          const b = el.querySelector('b');
+          if (!b) return;
+          let hide = false;
+          if (mine.length) {
+            const q = b.getBoundingClientRect();
+            hide = q.width > 0 && mine.some((r) => r.left < q.right - 1 && r.right > q.left + 1 && r.top < q.bottom - 1 && r.bottom > q.top + 1);
+          }
+          b.classList.toggle('is-masked', hide);
+        });
       };
       // client point -> map units (the canvas box is the whole map, even where the band crops it)
       const toMap = (x, y) => {
@@ -354,6 +376,40 @@
           if (p < 1) anim = requestAnimationFrame(tick);
         };
         anim = requestAnimationFrame(tick);
+      };
+      /* A place picked on a zoomed map keeps its name and distance inside the frame and clear of the zoom
+         buttons (Codex, 16 Nov: Hrunalaug's "5 KM · 7 MIN" ran off the right edge of a phone at full zoom).
+         The map pans by the overflow only, eased, so nothing moves when the label already fits. */
+      reveal = (k) => {
+        mask();
+        if (!k || z <= 1.01) return;
+        const p = pts.get(k);
+        if (!p) return;
+        requestAnimationFrame(() => {
+          const r = canvas.getBoundingClientRect(), f = map.getBoundingClientRect(), c = ctl.getBoundingClientRect(), M = 10;
+          const parts = [...p.querySelectorAll('i, b, .map-km')].map((e) => e.getBoundingClientRect()).filter((b) => b.width);
+          if (!parts.length) return;
+          const u = parts.reduce((a, b) => ({ l: Math.min(a.l, b.left), t: Math.min(a.t, b.top), r: Math.max(a.r, b.right), b: Math.max(a.b, b.bottom) }),
+            { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity });
+          // the visible frame: the canvas, cropped by the map band on desktop
+          const hb = document.querySelector('.bar')?.getBoundingClientRect();   // the fixed site bar covers the top of the window
+          const L = Math.max(r.left, f.left) + M, R = Math.min(r.right, f.right) - M, B = Math.min(r.bottom, f.bottom, innerHeight) - M;
+          const T = Math.max(r.top, f.top, hb && hb.top <= 0 ? hb.bottom : 0) + M;
+          let dx = u.r > R ? u.r - R : u.l < L ? u.l - L : 0;
+          let dy = u.b > B ? u.b - B : u.t < T ? u.t - T : 0;
+          if (u.l - dx < c.right && u.r - dx > c.left && u.t - dy < c.bottom && u.b - dy > c.top) dy = u.t - (c.bottom + 6);
+          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+          const x0 = cx, y0 = cy, x1 = cx + dx / r.width * (W / z), y1 = cy + dy / r.height * (H / z);
+          cancelAnimationFrame(anim);
+          if (reduce) { cx = x1; cy = y1; apply(); return; }
+          const t0 = performance.now();
+          const tick = (t) => {
+            const q = Math.min(1, (t - t0) / 320), e = 1 - Math.pow(1 - q, 3);
+            cx = x0 + (x1 - x0) * e; cy = y0 + (y1 - y0) * e; apply();
+            if (q < 1) anim = requestAnimationFrame(tick);
+          };
+          anim = requestAnimationFrame(tick);
+        });
       };
       zIn.addEventListener('click', () => animTo(z * 2));
       zOut.addEventListener('click', () => animTo(z / 2));
