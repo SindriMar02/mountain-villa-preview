@@ -571,7 +571,35 @@
         return second.ok ? { ok: true, delivered: true } : { ok: false, message: `Mountain Villa is requested, Mountain Villa II could not be: ${second.message}` };
       } catch (_) { return { ok: false, message: 'The request could not reach the hosts. Check your connection and try again.' }; }
     };
-    const booking = window.mountBooking(book, { min: 2, max: 10, guests: 4, submit, taken: (k) => sets.v1.has(k), onStep: (step) => { bar.scrollTop = 0; book.dataset.step = step; } });
+    /* Prices (the owners, 16 Nov 2026): US dollars a night, the same all year, booked here 5% under the
+       Airbnb price, no cleaning fee, 3 nights minimum. The numbers live in _parts/build_pages.py and
+       reach the sheet as data attributes on #book; the engine (tenant mountainvilla) quotes the same.
+       Krónur and euros are a guide at the ECB rate printed under the sheet. */
+    const DIRECT = JSON.parse(book.dataset.price || '{}'), RATES = JSON.parse(book.dataset.rates || '{"USD":1}');
+    const MIN_N = +book.dataset.min || 3, PCT = +book.dataset.pct || 0;
+    const curBtns = [...book.querySelectorAll('.bk-cur button')];
+    let cur = 'USD';
+    try { const c = sessionStorage.getItem('mv-cur'); if (c && RATES[c]) cur = c; } catch (_) { /* no storage */ }
+    const group = (n, sep) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+    const money = (usd) => {
+      const v = usd * RATES[cur];
+      if (cur === 'ISK') return `ISK ${group(Math.round(v / 100) * 100, ',')}`;
+      return `${cur === 'EUR' ? '€' : '$'}${group(Math.round(v), ',')}`;
+    };
+    const perNight = () => (house === 'both' ? (DIRECT.v1 || 0) + (DIRECT.v2 || 0) : DIRECT[house] || 0);
+    const price = (s, e) => {
+      const n = Math.round((new Date(e + 'T00:00:00') - new Date(s + 'T00:00:00')) / 864e5), night = perNight();
+      if (!night || n < 1) return '';
+      return `${money(night * n)} booked here · ${money(night)} a night, ${PCT}% under Airbnb${cur === 'USD' ? '' : ' (a guide; the price is in US dollars)'}`;
+    };
+    const booking = window.mountBooking(book, { min: MIN_N, max: 10, guests: 4, submit, price, taken: (k) => sets.v1.has(k), onStep: (step) => { bar.scrollTop = 0; book.dataset.step = step; } });
+    const paintCur = () => curBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === cur)));
+    paintCur();
+    curBtns.forEach((b) => b.addEventListener('click', () => {
+      if (b.dataset.cur === cur) return;
+      cur = b.dataset.cur; paintCur(); booking.refresh();
+      try { sessionStorage.setItem('mv-cur', cur); } catch (_) { /* private mode */ }
+    }));
     const setHouse = (h) => {
       house = sets[h] ? h : 'v1';
       houseBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.house === house)));
@@ -692,22 +720,20 @@
       weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       checkIn: 'Arrival', checkOut: 'Departure', pickDate: 'Pick a date', afterCheckIn: 'After arrival',
       night: 'night', nights: 'nights', prevMonth: 'Previous month', nextMonth: 'Next month', taken: 'booked',
-      empty: '', minStay: (d) => `Two nights at least: the earliest departure is ${d}.`, chosen: () => '',
+      empty: '', minStay: (d) => `Three nights at least: the earliest departure is ${d}.`, chosen: () => '',
       crosses: (d) => `The house is booked from ${d}. Choose a departure on or before that day, or a new arrival.`,
     };
     let picker;
     let step = 'dates';
-    /* Guests: up to ten in one house, twenty in both. Price: what the stay costs booked direct, from
-       the Airbnb totals read on 22 Oct 2026 less 5%, per night (Mountain Villa showed one price in
-       November and June; Mountain Villa II €881 in winter, €1,113 in summer). An estimate the hosts
-       confirm, said so on the page. */
+    /* Guests: up to ten in one house, twenty in both. Price: the owners' price a night (16 Nov 2026,
+       US dollars, all year), less 5% booked direct. */
     const MAX = { v1: 10, v2: 10, both: 20 };
-    const RATE = { v1: () => 2369 / 3, v2: (d) => (d.getMonth() >= 4 && d.getMonth() <= 8 ? 3339 / 3 : 2644 / 3) };
+    const RATE = { v1: () => 887, v2: () => 1250 };
     const nEl = document.getElementById('stayN'), gnote = document.getElementById('stayGnote');
     const price = document.getElementById('stayPrice');
     const minus = document.querySelector('.stay-minus'), plus = document.querySelector('.stay-plus');
     let guests = 6;
-    const eur = (n) => '€' + Math.round(n).toLocaleString('en-GB');
+    const eur = (n) => '$' + Math.round(n).toLocaleString('en-US');
     const quote = (r) => {
       let airbnb = 0;
       for (let d = r.start; d < r.end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
@@ -753,7 +779,7 @@
     const mountPicker = (s, e) => {
       cal.textContent = '';
       picker = window.createStayPicker({
-        mount: cal, prefix: 'kl-stay', minStay: 2, L, onChange: sync,
+        mount: cal, prefix: 'kl-stay', minStay: 3, L, onChange: sync,
         taken: (d) => sets[which].has(picker ? picker.key(d) : d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')),
         start: s, end: e,
       });

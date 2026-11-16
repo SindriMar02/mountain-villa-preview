@@ -7,7 +7,7 @@
 // confirmation: every future night shows as open, the summary counts nights only, and the final state says plainly
 // that this is the preview. The production layer swaps `submitRequest` for the real engine and `openNights` for the
 // synced calendar.
-function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep = () => {}, taken = () => false, submit = null } = {}) {
+function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep = () => {}, taken = () => false, submit = null, price = null } = {}) {
   let maxN = max, takenFn = taken;   // Mountain Villas: both change with the chosen house
   const $ = (s, c = root) => c.querySelector(s);
   const $$ = (s, c = root) => [...c.querySelectorAll(s)];
@@ -64,16 +64,18 @@ function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep
       d.setAttribute('aria-pressed', String(on)); d.tabIndex = d === tab ? 0 : -1;
     });
   }
+  // `price` (optional): (arrival, departure) -> a short line for the stay, e.g. "$2,526 booked here".
+  const cost = () => { const p = price && st.start && st.end ? price(st.start, st.end) : ''; return p ? `<span class="p">${p}</span>` : ''; };
   function labels() {
     from.textContent = st.start ? fShort.format(at(st.start)) : 'Arrival'; from.classList.toggle('is-set', !!st.start);
     to.textContent = st.end ? fShort.format(at(st.end)) : 'Departure'; to.classList.toggle('is-set', !!st.end);
     if (st.step === 'dates') {
       sum.innerHTML = st.start && st.end
-        ? `<span class="d">${fShort.format(at(st.start))} to ${fShort.format(at(st.end))}</span><span class="a">${plural(nights(), 'night')}, ${plural(st.guests, 'guest')}. The host confirms and sends a secure pay link.</span>`
+        ? `<span class="d">${fShort.format(at(st.start))} to ${fShort.format(at(st.end))}</span>${cost()}<span class="a">${plural(nights(), 'night')}, ${plural(st.guests, 'guest')}. The host confirms and sends a secure pay link.</span>`
         : `<span class="is-muted">${st.start ? 'Now choose your departure date' : 'Choose your arrival and departure dates'}</span>`;
       actionLabel.textContent = 'Request these dates';
     } else if (st.step === 'who') {
-      sum.innerHTML = `<span class="d">${fShort.format(at(st.start))} to ${fShort.format(at(st.end))}</span><span class="a">${plural(nights(), 'night')}, ${plural(st.guests, 'guest')}. Add your details and send the request.</span>`;
+      sum.innerHTML = `<span class="d">${fShort.format(at(st.start))} to ${fShort.format(at(st.end))}</span>${cost()}<span class="a">${plural(nights(), 'night')}, ${plural(st.guests, 'guest')}. Add your details and send the request.</span>`;
       actionLabel.textContent = 'Send request';
     }
   }
@@ -196,6 +198,7 @@ function mountBooking(root, { min = 2, max = 10, guests = 2, months = 18, onStep
     firstDay() { return $('.bk-d[tabindex="0"]'); },
     setHouse(nextMax, nextTaken) { maxN = nextMax; takenFn = nextTaken; st.start = st.end = st.hover = st.focus = ''; if (st.step !== 'dates') setStep('dates'); st.guests = Math.min(st.guests, maxN); if (st.drawn) { render(); paint(); } fit(); say(''); },
     reset() { st.start = st.end = st.hover = st.focus = ''; st.step = 'dates'; form.reset(); st.guests = guests; setStep('dates'); fit(); if (st.drawn) paint(); say(''); },
+    refresh() { labels(); },
     get step() { return st.step; }
   };
 }
