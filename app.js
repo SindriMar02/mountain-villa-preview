@@ -584,21 +584,44 @@
     } else { seen = true; arm(); }
   }
 
+  /* ---------- AVAILABILITY: the nights each house is taken, live ----------
+     GET /booking/nights on SNDR Bókun, once per page, both houses (17 Nov 2026; until
+     then a 22 Oct snapshot of the Airbnb calendars, taken.js). Dates only, no guest data.
+     The production domain talks to the production booking host; everything else (the
+     GitHub preview, local QA) to the owners' demo dashboard. If the calendar cannot be
+     read, nothing is struck through and the engine stays the final word on every request. */
+  const MV_API = /(^|\.)mountainvillasiceland\.com$/.test(location.hostname)
+    ? 'https://bokun.mountainvillasiceland.com'
+    : 'https://sndr-demo-mv.sindri-381.workers.dev';
+  const NIGHTS = { v1: new Set(), v2: new Set(), both: new Set() };
+  const nightsReady = Promise.all(['v1', 'v2'].map((u) =>
+    fetch(`${MV_API}/booking/nights?unit=${u}&days=400`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+  )).then((answers) => {
+    let got = false;
+    answers.forEach((a, i) => {
+      if (!a || !Array.isArray(a.taken)) return;
+      got = true;
+      const u = i ? 'v2' : 'v1';
+      a.taken.forEach((k) => { NIGHTS[u].add(k); NIGHTS.both.add(k); });
+    });
+    return got;
+  });
+
   /* ---------- BOOKING: the SNDR Bókun sheet ----------
      The family's range calendar (assets/vendor/sndr-booking.js): two months from
      768px, one on a phone, arrival then departure, a guests stepper, details, a
      request the hosts confirm. Opens from every [data-book] (the bar, the stay
      cards, "check dates for both"); the chosen house closes the nights its
-     Airbnb calendar showed as taken (assets/vendor/taken.js) and sets the cap
+     calendar has taken (AVAILABILITY above, live from SNDR Bókun) and sets the cap
      (10 in a house, 20 for both). Pointer open focuses the sheet itself,
      keyboard open the first selectable day (focus-guard rule). The request goes to
      the owners' demo dashboard (see `submit` below). */
   const book = document.getElementById('book');
   if (book && window.mountBooking) {
     const NAME = { v1: 'Mountain Villa', v2: 'Mountain Villa II', both: 'Both houses' };
-    const TAKEN = window.MV_TAKEN || { v1: [], v2: [] };
-    const sets = { v1: new Set(TAKEN.v1), v2: new Set(TAKEN.v2) };
-    sets.both = new Set([...sets.v1, ...sets.v2]);
+    const sets = NIGHTS;
     const bar = book.querySelector('.bk-bar');
     const sub = book.querySelector('#bk-sub');
     const houseBtns = [...book.querySelectorAll('.bk-house button')];
@@ -608,7 +631,7 @@
        lead time, so the sheet is never the only guard. Both houses = one request per house,
        guests split between them. If the API cannot be reached the sheet says so and keeps the
        guest's details; nothing pretends to have been sent. */
-    const API = 'https://sndr-demo-mv.sindri-381.workers.dev';
+    const API = MV_API;
     const sendOne = async (resourceId, people, r, both) => {
       const res = await fetch(`${API}/booking/request`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -692,6 +715,8 @@
       openBooking(t, e.detail === 0);
     });
     setHouse('v1');
+    /* The live nights arrive a moment after load: repaint, unless the guest is already past the dates. */
+    nightsReady.then((got) => { if (got && (!book.open || booking.step === 'dates')) setHouse(house); });
   }
 
   /* ---------- BAR: brand hides on the home hero, bar goes solid after 120 px ----------
@@ -749,15 +774,12 @@
   /* ---------- STAY: the SNDR stay picker + request ----------
      Two months, arrival then departure (assets/vendor/staypicker.js, the
      picker the other SNDR builds carry). On the homepage the guest also picks
-     a house, or both; on a house page it is fixed. Nights the house's Airbnb
-     calendar showed as taken on 22 Oct 2026 are struck through
-     (assets/vendor/taken.js; in production SNDR Bókun keeps them in sync).
+     a house, or both; on a house page it is fixed. Taken nights are struck
+     through (AVAILABILITY above, live from SNDR Bókun).
      Then the guest's details, and a request the hosts confirm with a pay
      link. This preview sends nothing. */
   const NAME = { v1: 'Mountain Villa', v2: 'Mountain Villa II', both: 'both houses' };
-  const TAKEN = window.MV_TAKEN || { v1: [], v2: [] };
-  const sets = { v1: new Set(TAKEN.v1), v2: new Set(TAKEN.v2) };
-  sets.both = new Set([...sets.v1, ...sets.v2]);
+  const sets = NIGHTS;
   const cal = document.getElementById('stayCal');
   const go = document.getElementById('stayGo');
   const sum = document.getElementById('staySum');
